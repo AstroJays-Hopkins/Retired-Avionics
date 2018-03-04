@@ -1,3 +1,7 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%
+//Current code does not use GPS/RF communication, will be edited to include these protocols in the near future
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
 //#include <RH_RF95.h>
 //#include <Adafruit_GPS.h>
 #include <Wire.h>
@@ -10,8 +14,8 @@
 float Flight_Log[7] = {0,0,0,0,0,0,0};
 //%%%%%%%%%%%%%%%%%%%%%%%% GPS SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 
-float latitude,longitude;
-char NS,EW;
+//float latitude,longitude;
+//char NS,EW;
 
 // what's the name of the hardware serial port?
 //SoftwareSerial GPSSerial(1,0);
