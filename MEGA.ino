@@ -323,8 +323,12 @@ void loop(){
 
  String data = "";
 
- data = avg_alt;
-
+ for (int i = 1;i < 8;i++){
+    data += Flight_Log[i];
+    if (i < 7) {
+      data += " ";
+    }
+ }
  File dataFile = SD.open("Flight.txt", FILE_WRITE);
 
  if (dataFile){
@@ -334,6 +338,7 @@ void loop(){
  else{
   Serial.println("error opening file Flight.txt");
  }
+
 
 //RF Communication//
 
