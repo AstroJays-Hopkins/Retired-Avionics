@@ -91,8 +91,8 @@ states timer = None;
 //int PL = 14;
 
 //%%%%%%%%%%%%%%%%%%%%%%%% RECOVERY PIN SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
-const int SEP = 5;
-const int R = 3;
+const int SEP = 5;  // Pin to relay responsible for separating rocket at apogee
+const int R = 3;    // Pin to relay responsible for deploying main parachute some time after separation
 
 void setup() { 
   Serial.begin(9600); 
@@ -122,8 +122,14 @@ void setup() {
   //recovery pins
   pinMode(R, OUTPUT);
   pinMode(SEP, OUTPUT);
-  digitalWrite(R, LOW);
-  digitalWrite(SEP, LOW);
+ /* Writing HIGH input to the recovery relays keeps them OPEN;
+    writing LOW input to the recovery relays CLOSES them.
+    It's counterintuitive; get used to it fast.  
+    FIXME: Check entire program prior to flight to make sure that the relays are operated as described above.
+    - avnoks 11 Nov 2018 1558 EDT
+ */
+  digitalWrite(R, HIGH);
+  digitalWrite(SEP, HIGH);
   
   //IMU
   bno.begin();
@@ -274,7 +280,7 @@ void loop(){
       new_Alt = avg_alt;
       T = millis();
       if ((new_Alt - old_Alt)/(millis() - T) < 0){
-        digitalWrite(SEP,HIGH);
+        digitalWrite(SEP, LOW);
         flight = Descent;
       }
       old_Alt = new_Alt;
@@ -283,30 +289,30 @@ void loop(){
     case Descent:
       Serial.println("DESCENT");
       if (avg_alt < 750){
-        digitalWrite(R, HIGH);
+        digitalWrite(R, LOW);
         Serial.println("RECOVER");
       }
   }
 
 
   //TIMER BASED DEPLOYMENT LOOP//
-
+/* Currently not used - avnoks 11 Nov 2018 1549 EDT */
   //switch(timer){
-   // case Thrust:
-     // T1 = millis();
-      //if(T1 > T0 + 20000){
-        //digitalWrite(SEP, HIGH);
-        //T0 = millis();
-        //timer = Descent;
-      }
-      //break;
+  //  case Thrust:
+  //    T1 = millis();
+  //    if(T1 > T0 + 20000){
+  //      digitalWrite(SEP, LOW);
+  //      T0 = millis();
+  //      timer = Descent;
+  //    }
+  //    break;
       
-    //case Descent:
-      //T1 = millis();
-      //if (T1 > T0 + 60000){
-        //digitalWrite(R, HIGH);
-      }
-  }
+  //  case Descent:
+  //    T1 = millis();
+  //    if (T1 > T0 + 60000){
+  //      digitalWrite(R, LOW);
+  //    }
+  //}
    ////////// GPS //////////
  //float latitude = GPS.latitudeDegrees;
  //float longitude = GPS.latitudeDegrees;
