@@ -88,11 +88,11 @@ states flight = None;
 states timer = None;
 
 //Payload pin
-int PL = 14;
+//int PL = 14;
 
 //%%%%%%%%%%%%%%%%%%%%%%%% RECOVERY PIN SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 const int SEP = 5;
-const int R = 4;
+const int R = 3;
 
 void setup() { 
   Serial.begin(9600); 
@@ -253,7 +253,7 @@ void loop(){
   switch(flight) {
     case Setup:
       Serial.println("SETUP");
-        if(avg_alt > 3){
+        if(avg_alt > 8){
           flight = Launchpad;
         }
       break;
@@ -262,7 +262,7 @@ void loop(){
       Serial.println("LAUNCHPAD");
       AutoCalibrate(xRaw,yRaw,zRaw);
       old_Alt = avg_alt;
-      if(old_Alt > 4){
+      if(old_Alt > 20){
         T0 = millis();
         flight = Thrust;
         timer = Thrust;
@@ -282,7 +282,7 @@ void loop(){
 
     case Descent:
       Serial.println("DESCENT");
-      if (avg_alt < 3){
+      if (avg_alt < 750){
         digitalWrite(R, HIGH);
         Serial.println("RECOVER");
       }
@@ -291,20 +291,20 @@ void loop(){
 
   //TIMER BASED DEPLOYMENT LOOP//
 
-  switch(timer){
-    case Thrust:
-      T1 = millis();
-      if(T1 > T0 + 20000){
-        digitalWrite(SEP, HIGH);
-        T0 = millis();
-        timer = Descent;
+  //switch(timer){
+   // case Thrust:
+     // T1 = millis();
+      //if(T1 > T0 + 20000){
+        //digitalWrite(SEP, HIGH);
+        //T0 = millis();
+        //timer = Descent;
       }
-      break;
+      //break;
       
-    case Descent:
-      T1 = millis();
-      if (T1 > T0 + 60000){
-        digitalWrite(R, HIGH);
+    //case Descent:
+      //T1 = millis();
+      //if (T1 > T0 + 60000){
+        //digitalWrite(R, HIGH);
       }
   }
    ////////// GPS //////////
