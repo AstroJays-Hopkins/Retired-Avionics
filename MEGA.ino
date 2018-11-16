@@ -1,4 +1,4 @@
-//#include <RH_RF95.h>
+#include <RH_RF95.h>
 //#include <Adafruit_GPS.h>
 #include <Wire.h>
 #include "IntersemaBaro.h"
@@ -8,36 +8,22 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
-
 int Flight_Log[9] = {0,0,0,0,0,0,0,0,0};
-
-char Datalog [9] = {0,0,0,0,0,0,0,0,0};
-
 int loop_counter;
 /*
 //%%%%%%%%%%%%%%%%%%%%%%%% GPS SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
-
-
-
 //what's the name of the hardware serial port?
 //SoftwareSerial GPSSerial(1,0);
-
-
 //Connect to the GPS on the hardware port
 //Adafruit_GPS GPS(&GPSSerial);
-
 //Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
 //Set to 'true' if you want to debug and listen to the raw GPS sentences
 //#define GPSECHO  true
 */
-
 //%%%%%%%%%%%%%%%%%%%%%%%% DATALOGGER SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 int chipSelect = 53;
-
 //%%%%%%%%%%%%%%%%%%%%%%%% ALTIMETER SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
-
 Intersema::BaroPressure_MS5607B baro(true);
-
 // Altitude variables
 float avg_alt;
 float alt0;
@@ -47,15 +33,11 @@ float new_Alt;
 unsigned long T0;
 unsigned long T1;
 unsigned long T;
-
 //%%%%%%%%%%%%%%%%%%%%%%%% IMU SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 #define BNO055_SAMPLERATE_DELAY_MS (100)
-
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 int ang[3] = {0,0,0};
-
 //%%%%%%%%%%%%%%%%%%%%%%%% ACCELEROMETER SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
-
 int xRawMin = 0;
 int xRawMax = 512;
  
@@ -64,15 +46,11 @@ int yRawMax = 512;
  
 int zRawMin = 0;
 int zRawMax = 512;
-
 int acc[3] = {0,0,0}; //accelerometer readout array; x, y, z axes respectively
-
 //%%%%%%%%%%%%%%%%%%%%%%%% RADIO SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 // Singleton instance of the radio driver
-//RH_RF95 rf95;
-
+RH_RF95 rf95;
 float frequency = 915.0;
-
 //create state machine for deployment stages
 enum states{
   None,
@@ -82,18 +60,15 @@ enum states{
   Descent,
   Deployment
 };
-
 //set initial state
 states flight = None;
 states timer = None;
-
 //Payload pin
-//int PL = 14;
-
+//const int PL = 14;
 //%%%%%%%%%%%%%%%%%%%%%%%% RECOVERY PIN SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
-const int SEP = 5;  // Pin to relay responsible for separating rocket at apogee
-const int R = 3;    // Pin to relay responsible for deploying main parachute some time after separation
-
+//const int SAFETY = 22;
+const int SEP = 5;
+const int R = 3;
 void setup() { 
   Serial.begin(9600); 
   Serial.println("initializing");
@@ -103,7 +78,7 @@ void setup() {
     Serial.println("Waiting for GPS signal...");
   }
   */
-/*  while (!Serial) ; // Wait for serial port to be available
+  while (!Serial) ; // Wait for serial port to be available
   if (!rf95.init())
   Serial.println("init failed");
   // Setup ISM frequency
@@ -113,21 +88,14 @@ void setup() {
   // Defaults BW Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on
   Serial.print("Listening on frequency: ");
   Serial.println(frequency);
-*/
   //initialize pins
-  pinMode(A0, INPUT); //X
-  pinMode(A1, INPUT); //Y
-  pinMode(A2, INPUT); //Z
+  pinMode(A13, INPUT); //X
+  pinMode(A14, INPUT); //Y
+  pinMode(A15, INPUT); //Z
   
   //recovery pins
   pinMode(R, OUTPUT);
   pinMode(SEP, OUTPUT);
- /* Writing HIGH input to the recovery relays keeps them OPEN;
-    writing LOW input to the recovery relays CLOSES them.
-    It's counterintuitive; get used to it fast.  
-    FIXME: Check entire program prior to flight to make sure that the relays are operated as described above.
-    - avnoks 11 Nov 2018 1558 EDT
- */
   digitalWrite(R, HIGH);
   digitalWrite(SEP, HIGH);
   
@@ -138,10 +106,8 @@ void setup() {
   system = gyro = accel = mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
   Serial.println("Sensors Initialized");
-
   //altimeter
   baro.init();
-
   //set starting altitude
   alt0 = 0;
   altitude = 0;
@@ -153,7 +119,6 @@ void setup() {
       delay(10);
     }
   alt0 /= num_points;            //normalize to the number of samples collected
-
   //set initial states
   flight = Setup;
   timer = None;
@@ -164,7 +129,6 @@ void setup() {
     }
     else{
       File dataFile = SD.open("Flight.txt", FILE_WRITE);
-
       if (dataFile){
           dataFile.println("Beginning New Flight");
           dataFile.close();
@@ -177,7 +141,6 @@ void setup() {
       Serial.println("Initialization Complete");
     }
 }
-
 //create a loop to calculate average acceleration values
 int ReadAxis(int axisPin)
 {
@@ -189,7 +152,6 @@ int ReadAxis(int axisPin)
   }
   return reading/10;
 }
-
 void AutoCalibrate(int xRaw, int yRaw, int zRaw)
 {
   //Serial.println("Calibrate");
@@ -220,29 +182,23 @@ void AutoCalibrate(int xRaw, int yRaw, int zRaw)
     zRawMax = zRaw;
   }
 }
-
 void loop(){
-
   ////////// Accelerometer //////////
-  int xRaw = ReadAxis(A0); //take accelerometer voltages in X,Y,Z directions
-  int yRaw = ReadAxis(A1);
-  int zRaw = ReadAxis(A2);
-
+  int xRaw = ReadAxis(A13); //take accelerometer voltages in X,Y,Z directions
+  int yRaw = ReadAxis(A14);
+  int zRaw = ReadAxis(A15);
   int xScaled = map(xRaw, xRawMin, xRawMax, -1000, 1000); //convert acceleration signals from voltage to numerical values
   int yScaled = map(yRaw, yRawMin, yRawMax, -1000, 1000);
   int zScaled = map(zRaw, zRawMin, zRawMax, -1000, 1000);
-
   int AX = {xScaled / 1000.0}; //scale acceleration vectors
   int AY = {yScaled / 1000.0};
   int AZ = {zScaled / 1000.0};
-
   acc[1] = AX; //write acceleration vector values to array
   acc[2] = AY;
   acc[3] = AZ;
-
-  //if(AX = 0){
-    //digitalWrite(PL,HIGH);
-  //}
+ /* if(AX = 0){
+    digitalWrite(PL,HIGH);
+  }*/
   
   ////////// IMU //////////
   sensors_event_t event;
@@ -251,7 +207,6 @@ void loop(){
   ang[2] = {(int)event.orientation.y};
   ang[3] = {(int)event.orientation.z};
   delay(BNO055_SAMPLERATE_DELAY_MS);
-
   //ALTMETER BASED DEPLOYMENT LOOP//
   altitude = baro.getHeightCentiMeters()/30.48 - alt0;
   avg_alt += (altitude - avg_alt)/5;
@@ -259,7 +214,14 @@ void loop(){
   switch(flight) {
     case Setup:
       Serial.println("SETUP");
-        if(avg_alt > 8){
+      
+      //%%%SAFETY CONDITION%%%
+      //while (digitalRead(SAFETY) == LOW){
+        //Serial.println('Please activate safety switch to continue');
+      //delay(1000);
+      // }
+      
+        if(avg_alt > 10){
           flight = Launchpad;
         }
       break;
@@ -280,45 +242,39 @@ void loop(){
       new_Alt = avg_alt;
       T = millis();
       if ((new_Alt - old_Alt)/(millis() - T) < 0){
-        digitalWrite(SEP, LOW);
+        digitalWrite(SEP,HIGH);
         flight = Descent;
       }
       old_Alt = new_Alt;
       break;
-
     case Descent:
       Serial.println("DESCENT");
-      if (avg_alt < 750){
-        digitalWrite(R, LOW);
+      if (avg_alt < 35){
+        digitalWrite(R, HIGH);
         Serial.println("RECOVER");
       }
   }
-
-
   //TIMER BASED DEPLOYMENT LOOP//
-/* Currently not used - avnoks 11 Nov 2018 1549 EDT */
-  //switch(timer){
-  //  case Thrust:
-  //    T1 = millis();
-  //    if(T1 > T0 + 20000){
-  //      digitalWrite(SEP, LOW);
-  //      T0 = millis();
-  //      timer = Descent;
-  //    }
-  //    break;
+/*  switch(timer){
+    case Thrust:
+      T1 = millis();
+      if(T1 > T0 + 40000){
+        digitalWrite(SEP, HIGH);
+        T0 = millis();
+        timer = Descent;
+      }
+      break;
       
-  //  case Descent:
-  //    T1 = millis();
-  //    if (T1 > T0 + 60000){
-  //      digitalWrite(R, LOW);
-  //    }
-  //}
+    case Descent:
+      T1 = millis();
+      if (T1 > T0 + 60000){
+        digitalWrite(R, HIGH);
+      }
+  } */
    ////////// GPS //////////
  //float latitude = GPS.latitudeDegrees;
  //float longitude = GPS.latitudeDegrees;
-
   ////////// link data to arrays //////////
-
   Flight_Log[1] = {avg_alt};
   Flight_Log[2] = {acc[1]};
   Flight_Log[3] = {acc[2]};
@@ -326,9 +282,7 @@ void loop(){
   Flight_Log[5] = {ang[1]};
   Flight_Log[6] = {ang[2]};
   Flight_Log[7] = {ang[3]};
-
  String data = "";
-
  for (int i = 1;i < 8;i++){
     data += Flight_Log[i];
     if (i < 7) {
@@ -336,7 +290,6 @@ void loop(){
     }
  }
  File dataFile = SD.open("Flight.txt", FILE_WRITE);
-
  if (dataFile){
   dataFile.println(data);
   dataFile.close();
@@ -344,11 +297,8 @@ void loop(){
  else{
   Serial.println("error opening file Flight.txt");
  }
-
-
 //RF Communication//
-
-/*uint8_t Data[] = {Flight_Log[1]};
+uint8_t Data[] = {Flight_Log[1]};
   if (rf95.available())
   {    // Should be a message for us now   
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
@@ -370,10 +320,8 @@ void loop(){
     {
       Serial.println("recv failed");
     }
-  }*/
-
+  }
   //Debug//
-
    if (loop_counter % 20 == 0) {
     Serial.println("Altitude:");
     Serial.println(Flight_Log[1]);
@@ -391,6 +339,4 @@ void loop(){
     }
  
  loop_counter++;
-
 }
-
