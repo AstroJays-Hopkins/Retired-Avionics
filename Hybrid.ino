@@ -17,8 +17,8 @@ float PT [3] = {0,0,0};
 
 //create arrays for temperature and pressure values across 
 //the run tank and combustion chamber
-float TCrun [4]= {0,0,0,0};
-float TCburn [4] = {0,0,0,0};
+float TCrun [2]= {0,0};
+float TCburn [2] = {0,0};
 
 //declare SPI pins for thermocouple breakout
 int MAXDO = 50;
