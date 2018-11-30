@@ -17,8 +17,8 @@ float PT [3] = {0,0,0};
 
 //create arrays for temperature and pressure values across 
 //the run tank and combustion chamber
-float TCrun [3]= {0,0,0};
-float TCburn [3] = {0,0,0};
+float TCrun [4]= {0,0,0,0};
+float TCburn [4] = {0,0,0,0};
 
 //declare SPI pins for thermocouple breakout
 int MAXDO = 50;
@@ -27,7 +27,13 @@ int MAXCS;
 int MAXCLK = 52;
 
 //initialize thermocouple breakout board
-Adafruit_MAX31855 thermocouple(MAXCLK, MAXCS, MAXDO);
+Adafruit_MAX31855 thermocouple1(MAXCLK, MAXCS, MAXDO);
+Adafruit_MAX31855 thermocouple2(MAXCLK, MAXCS, MAXDO);
+Adafruit_MAX31855 thermocouple3(MAXCLK, MAXCS, MAXDO);
+Adafruit_MAX31855 thermocouple4(MAXCLK, MAXCS, MAXDO);
+
+Adafruit_MAX31855 TC [4] = {thermocouple1,thermocouple2,thermocouple3,thermocouple4};
+
 
 
 //define pins for sensor data
@@ -102,10 +108,10 @@ void loop() {
 
   //do not vent in flight, therefore do not transmit data after launch command has been issued
   while(FIRE = 0){
-    for(int j = 0; j < 4; j++){
+    for(int j = 0; j < 2; j++){
       MAXCS = TCCS[j];
-      TCrun[j] = thermocouple.readCelsius();
-      TCburn[j] = thermocouple.readCelsius();
+      TCrun[j] = TC[j].readCelsius();
+      TCburn[j+2] = TC[j].readCelsius();
     }
     
     for(int k = 0; k < 3; k++){
