@@ -8,8 +8,9 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
-#include <Music.h>
-#include <musical-scores.h>
+#include <music.h>
+#include <pitches.h>
+#include "music-scores.h"
 int Flight_Log[9] = {0,0,0,0,0,0,0,0,0};
 int loop_counter;
 /*
@@ -70,7 +71,7 @@ states timer = None;
 
 //%%%%%%%%%%%%%%%%%%%%%%%% MUSIC SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 
-Music music(2);
+Music music(33);
 
 //%%%%%%%%%%%%%%%%%%%%%%%% RECOVERY PIN SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 //const int SAFETY = 22;
@@ -150,7 +151,7 @@ void setup() {
 
   // Music initialization
   music.music_array = ASZ_BEGINNING;
-  mus.is_playing = true;
+  music.is_playing = true;
 }
 
 

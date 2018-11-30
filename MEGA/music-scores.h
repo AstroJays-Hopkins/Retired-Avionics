@@ -8,6 +8,7 @@ const int ASZ_BEGINNING[] =
    NOTE_REST, 8,
    NOTE_DS5, 8, NOTE_D5, -4,
    NOTE_REST, -2,
+   MUSIC_STOP
 
    /* NOTE_C4, -2, NOTE_G4, -2, NOTE_C5, -3, */
    /* NOTE_REST, 8, */
