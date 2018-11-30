@@ -27,20 +27,20 @@ int MAXCS;
 int MAXCLK = 52;
 
 //initialize thermocouple breakout board
-Adafruit_MAX31855 thermocouple1(MAXCLK, MAXCS, MAXDO);
-Adafruit_MAX31855 thermocouple2(MAXCLK, MAXCS, MAXDO);
-Adafruit_MAX31855 thermocouple3(MAXCLK, MAXCS, MAXDO);
-Adafruit_MAX31855 thermocouple4(MAXCLK, MAXCS, MAXDO);
+Adafruit_MAX31855 thermocouple1(MAXCLK, TCCS[0], MAXDO);
+Adafruit_MAX31855 thermocouple2(MAXCLK, TCCS[1], MAXDO);
+Adafruit_MAX31855 thermocouple3(MAXCLK, TCCS[2], MAXDO);
+Adafruit_MAX31855 thermocouple4(MAXCLK, TCCS[3], MAXDO);
 
 Adafruit_MAX31855 TC [4] = {thermocouple1,thermocouple2,thermocouple3,thermocouple4};
 
 
 
 //define pins for sensor data
-byte Pins[] = {A0,A1,A2,A3,A4,A5,A6,A7};
+byte Pins[3] = {A0,A1,A2};
 
 //define condition for ignition to open ball valve
-int test = 4; //put switch at pin 4 
+int ARMED = 4; //put switch at pin 4 
 int FIRE;
 
 //radio communication setup
@@ -104,7 +104,7 @@ void setup() {
 
 void loop() {
   //determine if launch signal has been sent
-  if (digitalRead(test) == HIGH){
+  if (digitalRead(ARMED) == HIGH){ //MOVE CONDITION TO END OF LOOP
 
   //do not vent in flight, therefore do not transmit data after launch command has been issued
   while(FIRE = 0){
@@ -119,33 +119,30 @@ void loop() {
       PT[k] = map(PT[k],0,1023,0,10000);
     }
   
-    for (int l = 0; l < 4; l++){
+    for (int l = 0; l < 2; l++){
       if(TCrun[l] >= 309.5){
           Valves[0] == true;
+          Serial.println("TEMPERATURE CRITICAL");
       }
     }
 
     for (int m = 0; m < 3; m++){
       if(PT[m] >= 7240){
         Valves[0] == true;
+        Serial.println("PRESSURE CRITICAL");
       }
     }
-    char message;
     
     if(Valves[0] == true){
       digitalWrite(Emergency,LOW);
-      message = "Oxidizer state critical";
     }else if (Valves[0] == false){
       digitalWrite(Emergency,HIGH);
-      message = "Oxidizer not critical";
     }
   
     if(Valves[1] == false){
       Burn.write(0);
-      message = "Rocket not in flight";
     }else if(Valves[1] == true){
       Burn.write(180);
-      message = "Rocket in flight";
     }
   
     radio.stopListening();        // First, stop listening so we can talk.
@@ -179,8 +176,9 @@ void loop() {
       }
     }
     if (FIRE = 1){
-      Valves[1] = true;
+      Valves[1] = true; //ADD IGNITION PIN FOR RELAY
     }
   }  
   }
+  radio.stopListening();
 } 
