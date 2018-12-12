@@ -101,8 +101,14 @@ void setup() {
 
 
 
+///////////////////PT CALIBRATION ////////////////////////////
 
-////////////////////////////////////////////////
+float calibratePT(float pinreading) {
+  return ((pinreading - 100) / 820) * 5076;
+}
+
+
+//////////////////////////////////////////////////////////////
 
 
 
@@ -119,8 +125,7 @@ void loop() {
     }
     
     for(int k = 0; k < 3; k++){
-      PT[k] = analogRead(Pins[k]);
-      PT[k] = map(PT[k],0,1023,0,10000);
+      PT[k] = calibratePT(analogRead(Pins[k]));
     }
   
     for (int l = 0; l < 2; l++){ //test for critical temperature: open solenoid if above threshold, close if below
