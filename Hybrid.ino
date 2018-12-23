@@ -158,7 +158,7 @@ void loop() {
         }else{
         radio.write(&temp, sizeof(unsigned long));
       }
-      }
+    }
     for (int b = 0; b < 3; b++){
       unsigned long Pressure = PT[b];                             // Take the temperature, and send it.  This will block until complete
       if (!radio.write( &Pressure, sizeof(unsigned long) )){
