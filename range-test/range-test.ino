@@ -59,6 +59,8 @@ const unsigned int CTRL_PKT_PING_ECHO =     0b10010110;   // 150
  */
 
 unsigned int control_byte;   // used to store the control byte for global access
+unsigned int control_packet[3] = {CTRL_PKT_HDR_BYTE_1, CTRL_PKT_HDR_BYTE_2, NULL};   // Generic control packet with unspecified control byte.
+const unsigned int CTRL_PKT_LEN = 3;
 
 
 /* ***** PING VARIABLES, CONSTANTS ***** */
@@ -75,13 +77,30 @@ int number_bytes_read;   // Number of byte read from serial; for handling text m
 
 /* ***** FUNCTIONS ***** */
 
-void send_control_packet (unsigned int control_byte) {
-  radio.write(&CTRL_PKT_HDR_BYTE_1, sizeof(CTRL_PKT_HDR_BYTE_1));  // sizeof() expression should work, but I'm not sure
-  radio.write(&CTRL_PKT_HDR_BYTE_2, sizeof(CTRL_PKT_HDR_BYTE_2));
-  radio.write(&control_byte, sizeof(control_byte));
+/* void send_control_packet (unsigned int control_byte) { */
+/*   radio.write(&CTRL_PKT_HDR_BYTE_1, sizeof(CTRL_PKT_HDR_BYTE_1)); */
+/*   radio.write(&CTRL_PKT_HDR_BYTE_2, sizeof(CTRL_PKT_HDR_BYTE_2)); */
+/*   radio.write(&control_byte, sizeof(control_byte)); */
+/* } */
+
+void serial_newline () {
+  Serial.print("\n");
 }
 
-/* Makes sure an incoming control packet's headers are correct */
+void send_control_packet (unsigned int control_byte) {
+  // set last byte of control packet
+  control_packet[CTRL_PKT_LEN - 1] = control_byte;
+  // Transmit; declare errors
+  if (!radio.write(&control_packet, sizeof(control_packet))) {
+    Serial.print("[ERROR] Unable to send control packet: ");
+    for (int i; i < CTRL_PKT_LEN; i++) {
+      Serial.print(control_packet[i]);
+    }
+    serial_newline();
+  }
+}
+
+/* makes sure an incoming control packet's headers are correct */
 bool read_and_verify_headers () {
   unsigned int header1;
   unsigned int header2;
@@ -98,17 +117,22 @@ bool read_and_verify_headers () {
   }
 }
 
-/* FIXME: Add error check for radio.write() */
 void send_ping () {
   last_sent_ping_time = millis();
   // Stop listening for incoming packets so we can holler
   radio.stopListening();
   // declare to receiver that transmission is a ping transmit
   send_control_packet(CTRL_PKT_PING_TRANSMIT);
-  radio.write(&last_sent_ping_time, sizeof(last_sent_ping_time));
-  // Start listening for incoming packets again
-  Serial.print("Ping sent at ");
-  Serial.println(last_sent_ping_time);
+  // Send ping and declare if transmission was sucessful or not
+  if (radio.write(&last_sent_ping_time, sizeof(last_sent_ping_time))) {
+    // Start listening for incoming packets again
+    Serial.print("Ping sent at ");
+    Serial.println(last_sent_ping_time);
+  } else {
+    Serial.print("[ERROR] Ping at ");
+    Serial.print(last_sent_ping_time);
+    Serial.println(" not sucessfully transmitted.");
+  }
   radio.startListening();
 }
 
@@ -116,7 +140,16 @@ void echo_ping (unsigned long received_ping_time) {
   radio.stopListening();
   // declare to receiver that transmission is a ping echo
   send_control_packet(CTRL_PKT_PING_ECHO);
-  radio.write(&received_ping_time, sizeof(received_ping_time));
+  // Echo back ping and declare if transmission was sucessful
+  if (radio.write(&received_ping_time, sizeof(received_ping_time))) {
+    Serial.print("Received ping with timestamp ");
+    Serial.print(received_ping_time);
+    Serial.println(" echoed back sucessfully.");
+  } else {
+    Serial.print("[ERROR] Received ping with timestamp ");
+    Serial.print(received_ping_time);
+    Serial.println(" not sucessfully echoed.");
+  }
   radio.startListening();
 }  
 
@@ -128,7 +161,15 @@ void read_and_transmit_all_from_serial () {
   // Copy bytes from serial buffer to program buffer; transmit
   while (Serial.available()) {
     number_bytes_read = Serial.readBytes(buf, BUF_LEN);
-    radio.write(buf, number_bytes_read);
+    // Transmit buffer; if transmission unsucessful, declare prescence of error
+    if (!radio.write(buf, number_bytes_read)) {
+      Serial.println("[ERROR] Unable to transmit text message: ");
+      // Dump contents of buffer to serial
+      for (int i = 0; i < BUF_LEN; i++) {
+        Serial.write(buf[i]);
+      }
+      serial_newline();
+    }
     radio.startListening();
   }
 }
@@ -155,7 +196,7 @@ void handle_incoming_radio_communications () {
       echo_ping(last_echoed_ping_time);
       break;
     case CTRL_PKT_PING_ECHO:
-      // Other radio has returned a ping that this radio send.
+      // Other radio has returned a ping that this radio sent.
       // Read time, compare, and announce return of ping over serial line.
       radio.read(&last_returned_ping_time, sizeof(last_returned_ping_time));
       Serial.print("Ping at time ");
@@ -186,7 +227,7 @@ void setup() {
   }
 
   Serial.println("nRF24 Range Test Software v0.0.1.  Written when 2018 was still a thing.");
-  Serial.print("\n");
+  serial_newline();
   Serial.println("Should you like to send a message to the other radio participating in the range test,");
   Serial.println("type your message in the serial monitor input and strike RETURN.");
   Serial.println("In a moment, the radio will begin transmitting pings.");
