@@ -7,6 +7,7 @@
 #include <RF24_config.h>
 #include <RF24.h>
 #include <nRF24L01.h>
+#include "printf.h"
 /* ^^ Hrm, which of these are necessary? ... */
 
 /* ***** RADIO CONSTANTS, VARIABLES  ***** */
@@ -227,11 +228,19 @@ void check_for_other_modules () {
   serial_newline();
 }
 
+void print_debugging_information () {
+  Serial.println("--------------- RADIO MODULE STATUS AND DEBUGGING INFORMATION ---------------");
+  radio.printDetails();
+  printf("Radio setup identity: %d", digitalRead(id_pin));
+  check_for_other_modules();
+}
+
 void setup() {
   // Configure id_pin as input with pullup resistor activated
   pinMode(id_pin, INPUT_PULLUP);
   
   Serial.begin(115200); // We're the rocketry team...
+  printf_begin();
 
   radio.begin();        // Initialize the radio
   // ^^ the transmission power level should be high by default.
@@ -248,9 +257,9 @@ void setup() {
   }
 
   Serial.println("nRF24 Range Test Software v0.0.2.  Started when 2018 was still a thing.");
-  Serial.println("--------------- RADIO MODULE STATUS AND DEBUGGING INFORMATION ---------------");
-  radio.printDetails();
 
+  print_debugging_information();
+  
   Serial.println("For Esperanto, please press one.");
   serial_newline();
 
@@ -275,9 +284,7 @@ void loop() {
     // Check to see if asking to print details
     char c = toupper(Serial.peek());
     if (c = 'Z') {
-      Serial.println("--------------- RADIO MODULE STATUS AND DEBUGGING INFORMATION ---------------");
-      radio.printDetails();
-      check_for_other_modules();
+      print_debugging_information();
     } else {  // Otherwise read and transmit message over radio
       read_and_transmit_all_from_serial();
     }
