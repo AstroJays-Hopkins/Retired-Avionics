@@ -19,11 +19,13 @@
 
 // Pipe addresses have been stolen from the RF24 GettingStarted example
 const uint64_t pipe_addresses[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
-/* Used by program to distinguish between the two different radios used
- * in range testing.  Configure when compiling (sorry).
- * FIXME: Prompt user for identity or set identity by shorting an input pin
+
+/* Pin read by program to distinguish between the two different radios 
+ * used in range testing.  Prior to uploading code to Arduino or 
+ * pressing the reset button, connect the id_pin to ground for one of 
+ * the radios; leave the pin on the other radio unconnected.
  * FIXME: See if we can use Nordic's nRF24 node system instead. */
-const bool id_number = 0;
+const int id_pin = 7;
 
 /* Used to store the number of bytes read from the serial line
  * Also the maximum payload size for the radio; see documentation for 
@@ -59,7 +61,7 @@ const unsigned int CTRL_PKT_PING_ECHO =     0b10010110;   // 150
  */
 
 unsigned int control_byte;   // used to store the control byte for global access
-unsigned int control_packet[3] = {CTRL_PKT_HDR_BYTE_1, CTRL_PKT_HDR_BYTE_2, NULL};   // Generic control packet with unspecified control byte.
+unsigned int control_packet[3] = {CTRL_PKT_HDR_BYTE_1, CTRL_PKT_HDR_BYTE_2, 0};   // Generic control packet with unspecified control byte.
 const unsigned int CTRL_PKT_LEN = 3;
 
 
@@ -88,19 +90,20 @@ void serial_newline () {
 }
 
 void send_control_packet (unsigned int control_byte) {
-  // set last byte of control packet
+  // set last byte of control packet to control byte
   control_packet[CTRL_PKT_LEN - 1] = control_byte;
   // Transmit; declare errors
-  if (!radio.write(&control_packet, sizeof(control_packet))) {
-    Serial.print("[ERROR] Unable to send control packet: ");
+  if (!radio.write(&control_packet, CTRL_PKT_LEN)) {
+    Serial.print("[ERROR] Unable to send control packet:");
     for (int i; i < CTRL_PKT_LEN; i++) {
+      Serial.print(" ");
       Serial.print(control_packet[i]);
     }
     serial_newline();
   }
 }
 
-/* makes sure an incoming control packet's headers are correct */
+/* Determines if an incoming control packet's headers are correct */
 bool read_and_verify_headers () {
   unsigned int header1;
   unsigned int header2;
@@ -119,7 +122,8 @@ bool read_and_verify_headers () {
 
 void send_ping () {
   last_sent_ping_time = millis();
-  // Stop listening for incoming packets so we can holler
+  // Stop listening for incoming packets so we can holler.  Must call
+  // radio.stopListening() prior to calling radio.write() .
   radio.stopListening();
   // declare to receiver that transmission is a ping transmit
   send_control_packet(CTRL_PKT_PING_TRANSMIT);
@@ -133,6 +137,7 @@ void send_ping () {
     Serial.print(last_sent_ping_time);
     Serial.println(" not sucessfully transmitted.");
   }
+  // Resume listening
   radio.startListening();
 }
 
@@ -211,14 +216,30 @@ void handle_incoming_radio_communications () {
   }
 }
 
+void check_for_other_modules () {
+  Serial.println("--------------- RADIO MODULE LISTENING TESTS ---------------");
+  Serial.println("Attempting to detect other radio modules ...");
+  Serial.print("radio.testCarrier() returned ");
+  Serial.print(radio.testCarrier());
+  serial_newline();
+  Serial.print("radio.testRPD() returned     ");
+  Serial.print(radio.testRPD());
+  serial_newline();
+}
+
 void setup() {
+  // Configure id_pin as input with pullup resistor activated
+  pinMode(id_pin, INPUT_PULLUP);
+  
   Serial.begin(115200); // We're the rocketry team...
 
   radio.begin();        // Initialize the radio
   // ^^ the transmission power level should be high by default.
+  // vv Increase delay between retries and number of retries
+  radio.setRetries(15,15);
   
   /* Set up pipes */
-  if(id_number) {
+  if(digitalRead(id_pin)) {  // Use state of id_pin to determine identity of radio
     radio.openWritingPipe(pipe_addresses[0]);
     radio.openReadingPipe(1,pipe_addresses[1]);  // use reading pipe number 1; assign it the second pipe_address .
   } else {   // if we are the other radio, swap the reading and writing pipes
@@ -226,11 +247,20 @@ void setup() {
     radio.openReadingPipe(1,pipe_addresses[0]);
   }
 
-  Serial.println("nRF24 Range Test Software v0.0.1.  Written when 2018 was still a thing.");
+  Serial.println("nRF24 Range Test Software v0.0.2.  Started when 2018 was still a thing.");
+  Serial.println("--------------- RADIO MODULE STATUS AND DEBUGGING INFORMATION ---------------");
+  radio.printDetails();
+
+  Serial.println("For Esperanto, please press one.");
   serial_newline();
+
   Serial.println("Should you like to send a message to the other radio participating in the range test,");
   Serial.println("type your message in the serial monitor input and strike RETURN.");
-  Serial.println("In a moment, the radio will begin transmitting pings.");
+  Serial.println("If you would like to print the radio module's configuration and status information,");
+  Serial.println("Please type the letter Z and strike RETURN.");
+  serial_newline();
+
+  Serial.println("In a moment, the radio will begin broadcasting ping signals.");
   delay(1000);
   radio.startListening();
 }
@@ -240,9 +270,19 @@ void loop() {
   if (radio.available()) {
     handle_incoming_radio_communications();
   }
+
   if (Serial.available()) {
-    read_and_transmit_all_from_serial();
+    // Check to see if asking to print details
+    char c = toupper(Serial.peek());
+    if (c = 'Z') {
+      Serial.println("--------------- RADIO MODULE STATUS AND DEBUGGING INFORMATION ---------------");
+      radio.printDetails();
+      check_for_other_modules();
+    } else {  // Otherwise read and transmit message over radio
+      read_and_transmit_all_from_serial();
+    }
   }
+
   // time to send another ping?
   if (millis() > (last_sent_ping_time + PING_INTERVAL)) {
     send_ping();
