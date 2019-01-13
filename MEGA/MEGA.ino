@@ -11,7 +11,7 @@
 #include <music.h>
 #include <pitches.h>
 #include "music-scores.h"
-int Flight_Log[9] = {0,0,0,0,0,0,0,0,0};
+int Flight_Log[10] = {0,0,0,0,0,0,0,0,0,0};
 int loop_counter;
 /*
 //%%%%%%%%%%%%%%%%%%%%%%%% GPS SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
@@ -54,7 +54,7 @@ int acc[3] = {0,0,0}; //accelerometer readout array; x, y, z axes respectively
 // Singleton instance of the radio driver
 RH_RF95 rf95;
 float frequency = 915.0;
-//create state machine for deployment stages
+//create state machine for deployment 
 enum states{
   None,
   Setup,
@@ -66,6 +66,10 @@ enum states{
 //set initial state
 states flight = None;
 states timer = None;
+
+//set stage of rocket (1-5, indicating SETUP, LAUNCHPAD, POWERED FLIGHT, DESCENT, RECOVERY)
+int stages[5] = {1,2,3,4,5};
+int currentStage;
 //Payload pin
 //const int PL = 14;
 
@@ -196,6 +200,10 @@ void AutoCalibrate(int xRaw, int yRaw, int zRaw)
     zRawMax = zRaw;
   }
 }
+
+//set current stage indicator to 1 for setup
+currentStage = stages[1];
+
 void loop(){
   ////////// Accelerometer //////////
   int xRaw = ReadAxis(A13); //take accelerometer voltages in X,Y,Z directions
@@ -241,6 +249,7 @@ void loop(){
       break;
       
     case Launchpad:
+      currentStage = stages[2];
       Serial.println("LAUNCHPAD");
       AutoCalibrate(xRaw,yRaw,zRaw);
       old_Alt = avg_alt;
@@ -252,6 +261,7 @@ void loop(){
       break;
     
     case Thrust:
+      currentStage = stages[3];
       Serial.println("THRUST");
       new_Alt = avg_alt;
       T = millis();
@@ -262,9 +272,11 @@ void loop(){
       old_Alt = new_Alt;
       break;
     case Descent:
+      currentStage = stages[4];
       Serial.println("DESCENT");
       if (avg_alt < 35){
         digitalWrite(R, HIGH);
+        currentStage = stages[5];
         Serial.println("RECOVER");
       }
   }
@@ -296,10 +308,11 @@ void loop(){
   Flight_Log[5] = {ang[1]};
   Flight_Log[6] = {ang[2]};
   Flight_Log[7] = {ang[3]};
+  Flight_Log[8] = {currentStage};
  String data = "";
- for (int i = 1;i < 8;i++){
+ for (int i = 1;i < 10;i++){
     data += Flight_Log[i];
-    if (i < 7) {
+    if (i < 8) {
       data += " ";
     }
  }
@@ -347,9 +360,11 @@ uint8_t Data[] = {Flight_Log[1]};
     Serial.println(Flight_Log[5]);
     Serial.println(Flight_Log[6]); 
     Serial.println(Flight_Log[7]);
-    Serial.println("GPS Latitude, GPS Longitude:");
+    Serial.println("Rocket stage");
     Serial.println(Flight_Log[8]);
-    Serial.println(Flight_Log[9]);  
+    Serial.println("GPS Latitude, GPS Longitude:");
+    Serial.println(Flight_Log[9]);
+    Serial.println(Flight_Log[10]);  
   }
    
   music.update();
