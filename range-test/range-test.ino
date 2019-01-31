@@ -231,7 +231,7 @@ void check_for_other_modules () {
 void print_debugging_information () {
   Serial.println("--------------- RADIO MODULE STATUS AND DEBUGGING INFORMATION ---------------");
   radio.printDetails();
-  printf("Radio setup identity: %d", digitalRead(id_pin));
+  printf("Radio setup identity: %d\n", digitalRead(id_pin));
   check_for_other_modules();
 }
 
