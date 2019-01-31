@@ -70,8 +70,6 @@ states timer = None;
 //set stage of rocket (1-5, indicating SETUP, LAUNCHPAD, POWERED FLIGHT, DESCENT, RECOVERY)
 int stages[5] = {1,2,3,4,5};
 int currentStage;
-//Payload pin
-//const int PL = 14;
 
 //%%%%%%%%%%%%%%%%%%%%%%%% MUSIC SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 
@@ -79,8 +77,8 @@ Music music(33);
 
 //%%%%%%%%%%%%%%%%%%%%%%%% RECOVERY PIN SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 //const int SAFETY = 22;
-const int SEP = 5;
-const int R = 3;
+const int SEP = 3;
+const int R = 5;
 void setup() { 
   Serial.begin(9600); 
   Serial.println("initializing");
@@ -154,7 +152,6 @@ void setup() {
     }
 
   // Music initialization
-  music.music_array = ASZ_BEGINNING;
   music.is_playing = true;
 }
 
@@ -218,9 +215,6 @@ void loop(){
   acc[1] = AX; //write acceleration vector values to array
   acc[2] = AY;
   acc[3] = AZ;
- /* if(AX = 0){
-    digitalWrite(PL,HIGH);
-  }*/
   
   ////////// IMU //////////
   sensors_event_t event;
@@ -229,6 +223,8 @@ void loop(){
   ang[2] = {(int)event.orientation.y};
   ang[3] = {(int)event.orientation.z};
   delay(BNO055_SAMPLERATE_DELAY_MS);
+ 
+ 
   //ALTMETER BASED DEPLOYMENT LOOP//
   altitude = baro.getHeightCentiMeters()/30.48 - alt0;
   avg_alt += (altitude - avg_alt)/5;
@@ -236,24 +232,18 @@ void loop(){
   switch(flight) {
     case Setup:
       Serial.println("SETUP");
-      
-      //%%%SAFETY CONDITION%%%
-      //while (digitalRead(SAFETY) == LOW){
-        //Serial.println('Please activate safety switch to continue');
-      //delay(1000);
-      // }
-      
-        if(avg_alt > 10){
+      delay(2000);
           flight = Launchpad;
         }
       break;
       
     case Launchpad:
       currentStage = stages[2];
+      music.music_array = ARMED_SIGNAL;
       Serial.println("LAUNCHPAD");
       AutoCalibrate(xRaw,yRaw,zRaw);
       old_Alt = avg_alt;
-      if(old_Alt > 20){
+      if(old_Alt > 30){
         T0 = millis();
         flight = Thrust;
         timer = Thrust;
@@ -262,22 +252,26 @@ void loop(){
     
     case Thrust:
       currentStage = stages[3];
+      music.music_array = THRUST_SIGNAL;
       Serial.println("THRUST");
       new_Alt = avg_alt;
       T = millis();
       if ((new_Alt - old_Alt)/(millis() - T) < 0){
-        digitalWrite(SEP,HIGH);
+        digitalWrite(SEP, LOW);
         flight = Descent;
       }
       old_Alt = new_Alt;
       break;
+ 
     case Descent:
       currentStage = stages[4];
+      music.music_array = DESCENT_SIGNAL;
       Serial.println("DESCENT");
-      if (avg_alt < 35){
-        digitalWrite(R, HIGH);
+      if (avg_alt < 1000){
+        digitalWrite(R, LOW);
         currentStage = stages[5];
         Serial.println("RECOVER");
+        music.music_array = RECOVERY_SIGNAL;
       }
   }
   //TIMER BASED DEPLOYMENT LOOP//
@@ -297,6 +291,8 @@ void loop(){
         digitalWrite(R, HIGH);
       }
   } */
+
+
    ////////// GPS //////////
  //float latitude = GPS.latitudeDegrees;
  //float longitude = GPS.latitudeDegrees;
