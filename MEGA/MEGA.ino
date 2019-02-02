@@ -95,8 +95,8 @@ const int PL = 14;
 //%%%%%%%%%%%%%%%%%%%%%%%% RECOVERY PIN SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 
 const int SAFETY = 22;
-const int SEP = 5;
-const int R = 3;
+const int SEP = 3;
+const int R = 5;
 
 void setup() { 
   Serial.begin(9600); 
@@ -118,8 +118,8 @@ void setup() {
   //recovery pins
   pinMode(R, OUTPUT);
   pinMode(SEP, OUTPUT);
-  digitalWrite(R, LOW);
-  digitalWrite(SEP, LOW);
+  digitalWrite(R, HIGH);
+  digitalWrite(SEP, HIGH);
   
   //IMU
   bno.begin();
@@ -234,10 +234,6 @@ void loop(){
   acc[1] = AX; //write acceleration vector values to array
   acc[2] = AY;
   acc[3] = AZ;
-
-  if(AX = 0){
-    digitalWrite(PL,HIGH);
-  }
   
   ////////// IMU //////////
   sensors_event_t event;
@@ -262,6 +258,7 @@ void loop(){
       delay(1000);
        }
       */
+      music.music_array = ARMED_SIGNAL;
         if(avg_alt > 10){
           flight = Launchpad;
         }
@@ -270,7 +267,6 @@ void loop(){
     case Launchpad:
       currentStage = stages[1];
       Serial.println("LAUNCHPAD");
-      music.music_array = ARMED_SIGNAL;
       AutoCalibrate(xRaw,yRaw,zRaw);
       old_Alt = avg_alt;
       if(old_Alt > 100){
@@ -287,7 +283,7 @@ void loop(){
       new_Alt = avg_alt;
       T = millis();
       if ((new_Alt - old_Alt)/(millis() - T) < 0){
-        digitalWrite(SEP,HIGH);
+        digitalWrite(SEP,LOW);
         flight = Descent;
       }
       old_Alt = new_Alt;
@@ -297,8 +293,8 @@ void loop(){
       currentStage = stages[3];
       music.music_array = DESCENT_SIGNAL;
       Serial.println("DESCENT");
-      if (avg_alt < 400){
-        digitalWrite(R, HIGH);
+      if (avg_alt < 1000){
+        digitalWrite(R, LOW);
         currentStage = stages[4];
         music.music_array = RECOVERY_SIGNAL;
         Serial.println("RECOVER");
@@ -308,12 +304,12 @@ void loop(){
 
   //TIMER BASED DEPLOYMENT LOOP//
 
-  switch(timer){
+/*  switch(timer){
     case Thrust:
       currentStage = stages[2];
       T1 = millis();
       if(T1 > T0 + 40000){
-        digitalWrite(SEP, HIGH);
+        digitalWrite(SEP, LOW);
         T0 = millis();
         timer = Descent;
       }
@@ -323,9 +319,9 @@ void loop(){
       currentStage = stages[3];
       T1 = millis();
       if (T1 > T0 + 60000){
-        digitalWrite(R, HIGH);
+        digitalWrite(R, LOW);
         currentStage = stages[4];
-      }
+      }*/
   }
    ////////// GPS //////////
  //float latitude = GPS.latitudeDegrees;
