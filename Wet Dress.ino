@@ -41,7 +41,7 @@ void setup() {
 
   //begin communication with load cells
   Serial1.begin(9600);
-  Serial2.begin(9600);
+  //Serial2.begin(9600);
 
   Serial.println("STABLIZING THERMOCOUPLES...");
   // wait for MAX chip to stabilize
