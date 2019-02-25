@@ -30,7 +30,10 @@ byte Pins[3] = {A0,A1};
 String CRIT;
 String Data = "";
 
-
+//define pins, variables for oxidizer venting control
+int VENT = 20;
+int ventBegin;
+int ventTime;
 
 ////////////////////////////////////////////////
 
@@ -53,6 +56,10 @@ void setup() {
   Serial.println("SENSORS READY");
   CRIT = "STABLE";
 
+  //initialize vent timer
+  pinMode(VENT,INPUT);
+  ventBegin = millis();
+  
   ////Data storage initialization////
   if (!SD.begin(chipSelect)) {
     Serial.println("Card failed, or not present");
@@ -108,7 +115,16 @@ void loop() {
         Serial.println("PRESSURE CRITICAL");
       }
     }
+  
+  ////Calculating venting time////
 
+  if(digitalRead(VENT == LOW)){
+    ventBegin = millis();
+    ventTime = 0;
+  }else{
+    ventTime = millis()-ventBegin;
+  }
+  
   ////Data processing////
 
   String Data = "";
@@ -124,6 +140,10 @@ void loop() {
 
   //append load cell data
   Data+=Serial1.read(); 
+  
+  //append vent timer data
+  Data+=" ";
+  Data+=ventTime;
   
   ////Data Storage////
   File dataFile = SD.open("Flight.txt", FILE_WRITE);
