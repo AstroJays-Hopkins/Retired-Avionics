@@ -10,7 +10,6 @@ float TC [2]= {0,0};
 //declare SPI pins for thermocouple breakout
 int MAXDO = 50;
 int TCCS [2] = {49,48};
-int MAXCS;
 int MAXCLK = 52;
 int chipSelect = 53;
 
@@ -40,10 +39,12 @@ int ventTime;
 
 void setup() {
   //begin serial communication for debugging
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   //begin communication with load cells
-  Serial1.begin(9600);
+  Serial1.begin(115200);
+  Serial1.write('c');
+  delay(1);
   //Serial2.begin(9600);
 
   Serial.println("STABLIZING THERMOCOUPLES...");
@@ -60,6 +61,7 @@ void setup() {
   pinMode(VENT,INPUT);
   ventBegin = millis();
   
+  /*
   ////Data storage initialization////
   if (!SD.begin(chipSelect)) {
     Serial.println("Card failed, or not present");
@@ -75,24 +77,56 @@ void setup() {
         Serial.println("error opening file Flight.txt");
         return;
       }
+    */
     Serial.println("Initialization Complete");
   }
 }
 
-
-
-
 ////////////////////////////////////////////////
 
+float readWeight()
+{
+    int timeOut = 2000; //Number of miliseconds before giving up
+    int counter;
+    
+    //Clear out any trash in the buffer
+    while(Serial1.available()) Serial1.read();
+    
+    //Send any character to trigger a read
+    Serial1.print('.');
+    
+    //Now we need to spin to the first comma after the time stamp
+    counter = 0;
+    while(Serial1.read() != ',')
+    {
+        if(counter++ == timeOut) return(0); //Error
+        delay(1);
+    }
+    //Now we read the weight
+    counter = 0;
+    String weightStr;
+    while(1)  {
+      if(Serial1.available()){
+        char incoming = Serial1.read();
+        if(incoming == ','){                
+          return(weightStr.toFloat());
+        }else{
+          weightStr.concat(String(incoming));
+        }
+      }
+        
+      if(counter++ == timeOut) return(0); //Error
+      delay(1);
+  }
+}      
 
-
+////////////////////////////////////////////////
 
 void loop() {
 
     Serial.print("Starting");
     CRIT = "STABLE";
     for(int j = 0; j < 2; j++){
-      MAXCS = TCCS[j]; //change CS line depending on which thermocouple data is taken from
       TC[j] = Thermocouples[j].readCelsius(); //take temperature data in celsius
     }
     //Serial.println("Taking pressure...");
@@ -137,14 +171,16 @@ void loop() {
     Data+=" ";
   }
   Data+=CRIT;
+  Data+=' ';
 
   //append load cell data
-  Data+=Serial1.read(); 
+  Data+=readWeight(); 
   
   //append vent timer data
   Data+=" ";
   Data+=ventTime;
   
+  /*
   ////Data Storage////
   File dataFile = SD.open("Flight.txt", FILE_WRITE);
 
@@ -155,6 +191,7 @@ void loop() {
   else{
     Serial.println("error opening file Flight.txt");
   }
+  */ 
   
   ////Data transmission////
   LoRa.beginPacket();
