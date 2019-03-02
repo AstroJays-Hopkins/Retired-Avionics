@@ -1,14 +1,13 @@
 /* 
- *  Ball valve control code.  Reads Hall effect
- *  built into the AndyMark RS-775 motor to 
- *  measure rotation.
+ *  Ball valve control code.  Reads Hall effect detector
+ *  built into the AndyMark RS-775 motor to measure rotation.
  *  
  *  Code adapted and pilfered from Jeffrey La Favre:
  *    http://www.lafavre.us/robotics/encoder_code.pdf
  *  An explanation of Hall effect encoders, also 
  *  by La Favre: 
  *    http://www.lafavre.us/robotics/Hall_Encoders.pdf
- *  Do take the technical explanation above with a grain of salt.
+ *  Do take the technical explanation located above with a grain of salt.
  *  
  *  BEFORE EDITING THIS PROGRAM, please read the
  *  "Notes and Warnings" on interrupts here: 
@@ -52,8 +51,8 @@ void turn_motor_on_reverse () {
   if (!Active_Relay_Pin) {
     turn_motor_off();
   }
-  digitalWrite(MOTOR_FORWARD_RELAY_PIN, HIGH);
-  Active_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
+  digitalWrite(MOTOR_REVERSE_RELAY_PIN, HIGH);
+  Active_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
 }
 
 /* *** MOTOR HALL EFFECT ENCODER *** */
