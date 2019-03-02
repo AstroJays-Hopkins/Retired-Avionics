@@ -18,8 +18,8 @@
 
 /*
  * Connections: 
- *   CHA --> Digital 2
- *   CHB --> Digital 3
+ *   Ch. A --> Digital 2
+ *   Ch. B --> Digital 3
  */
 
 /* *** MOTOR RELAY PINS, CONTROL FUNCTIONS *** */
@@ -27,8 +27,11 @@
 // Signal pin to relay that is currently powering motor.  If no relay is
 // currently on (running a motor), this variable will be 0 .
 int Active_Relay_Pin = 0;
-const int MOTOR_FORWARD_RELAY_PIN = 3;
-const int MOTOR_REVERSE_RELAY_PIN = 5;
+// Signal pins to relays.
+// Program assumes that one relay spins the motor forwad and the other relay
+// is connected to the motor backwards to spin it in reverse.
+const int MOTOR_FORWARD_RELAY_PIN = 5;
+const int MOTOR_REVERSE_RELAY_PIN = 6;
 
 void turn_off_motor () {
   digitalWrite(Active_Relay_Pin, LOW);
