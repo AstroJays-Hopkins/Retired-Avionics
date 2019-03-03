@@ -1,13 +1,28 @@
 #include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+
 String packet1;
 String packet2;
 String Data;
 int end1;
 int end2;
 
+const int chipSelect = 10;
+
 void setup() {
   Wire.begin();        // join i2c bus
-  Serial.begin(115200);  // start serial for output
+  Serial.begin(115200);  // start serial for output to GUI
+  
+  // see if the card is present and can be initialized:
+  SD.begin(chipSelect);
+  if (!SD.begin(chipSelect)) {
+    Serial.println("Card failed, or not present");
+    // don't do anything more:
+    return;
+  }else{
+    Serial.println("card initialized.");
+  }
 }
 
 void loop() {
@@ -31,5 +46,16 @@ void loop() {
 
   //combine packets from both devices
   Data = packet1 + packet2;
+  
+  File dataFile = SD.open("COLDFLOW.txt", FILE_WRITE);
+  // if the file is available, write to it:
+  if (dataFile) {
+    dataFile.println(Data);
+    dataFile.close();
+  }
+  // if the file isn't open, pop up an error:
+  else {
+    Serial.println("error opening COLDFLOW.txt");
+  }
   Serial.println(Data);
 }
