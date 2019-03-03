@@ -1,0 +1,20 @@
+Peripheral_Mega.ino 
+----------------------------------------------------------
+>collects data from load cells using UART serial communication 
+>calculates venting time based off duration of continutity of a button press circuit
+>determines open/closed condition of quick disconnect solenoid
+>writes data to ground station via I2C communication
+
+Sensing_Mega.ino
+----------------------------------------------------------
+>collects pressure data via analog pressure transducers
+>collects temperature data using SPI thermocouples
+>determines critical condition of the oxidizer
+>sends back information via I2C communication
+
+Ground_Station_Reader.ino
+----------------------------------------------------------
+>collects information sent from peripheral and sensing devices
+>formats data for use in Flask.app GUI
+>exports data for use in GUI via UART serial communication
+>logs data on SD card
