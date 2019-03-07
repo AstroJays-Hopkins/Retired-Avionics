@@ -18,3 +18,8 @@ Ground_Station_Reader.ino
 >formats data for use in Flask.app GUI
 >exports data for use in GUI via UART serial communication
 >logs data on SD card
+
+Wet_Dress.ino
+----------------------------------------------------------
+>serves the same purpose as Peripheral_Mega.ino and Sensing_Mega.ino but on one board
+>transmits data via USB serial to GUI
