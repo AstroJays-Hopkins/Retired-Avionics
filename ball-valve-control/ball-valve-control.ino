@@ -32,7 +32,7 @@ int Active_Relay_Pin = 0;
 const int MOTOR_FORWARD_RELAY_PIN = 5;
 const int MOTOR_REVERSE_RELAY_PIN = 6;
 
-void turn_off_motor () {
+void turn_motor_off () {
   digitalWrite(Active_Relay_Pin, LOW);
   Active_Relay_Pin = 0;
 }
@@ -61,7 +61,8 @@ int Encoder_Pulse_Count[2] = {0, 0};
                 // Channels: {A, B}
 
 void reset_pulse_count () { 
-  Encoder_Pulse_Count = {0, 0};
+  Encoder_Pulse_Count[0] = 0;
+  Encoder_Pulse_Count[1] = 0;
 }
 
 // Increment pulse count for channel A
@@ -86,7 +87,8 @@ void check_rotation_and_stop_if_needed () {
   /* Checks to see if motor has spun 90 degrees */
   if ((Encoder_Pulse_Count[0] >= 329) && (Encoder_Pulse_Count[1] >= 329)) {
     /* Shut off motor if that's the case. */
-    turn_off_motor();
+    turn_motor_off();
+    reset_pulse_count();
   }
 }
 
