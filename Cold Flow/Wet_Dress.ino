@@ -32,7 +32,7 @@ const int QDS = 21;
 String solenoidCondition;
 
 
-const int chipSelect = 53;
+//const int chipSelect = 53;
 
 ////////////////////////////////////////////////
 
@@ -49,11 +49,11 @@ void setup() {
   //Serial2.write('c');
   //delay(1);
   
-  if (!SD.begin(chipSelect)) {
+  /*if (!SD.begin(chipSelect)) {
     Serial.println("Card failed, or not present");
     // don't do anything more:
     return;
-  }
+  }*/
   
   //Serial.println("STABLIZING THERMOCOUPLES...");
   // wait for MAX chip to stabilize
@@ -207,14 +207,14 @@ void loop() {
   Data+=ventTime;
   Data+=" ";
   Data+=solenoidCondition;
-  File dataFile = SD.open("Flight.txt", FILE_WRITE);
+  /*File dataFile = SD.open("Flight.txt", FILE_WRITE);
   if (dataFile){
     dataFile.println(Data);
     dataFile.close();
   }
   //else{
     //Serial.println("UNABLE TO LOG");
-  //}
+  //}*/
   Serial.println(Data);
 }
 
