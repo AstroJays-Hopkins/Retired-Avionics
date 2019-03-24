@@ -2,6 +2,7 @@ from datetime import datetime
 from csv import writer
 import time
 import load_cell as lc
+import RocketThermocouple as tc
 try:
     import RPi.GPIO as GPIO  # RPi.GPIO documentation: https://sourceforge.net/p/raspberry-gpio-python/wiki/
 except:
@@ -43,18 +44,22 @@ def init():
 
 ### FUNCTIONS TO ITERATE THROUGH ALL SENSORS ###
 def collectData():
-    TC_DATA = readThermocouples()
+    TC_DATA = tc.readThermocouples()
     // change the critical checks to being a 2 state system so it doesnt continuiously call emergency shutdown
+    i = 0
     for temp in TC_DATA:
         if (temp > CRIT_T)
             emergency_shutdown()
             print('EMERGENCY SHUTDOWN: Critical Temperature detected')
+        i++
             
     PT_DATA = readPressureTransducers()
+    i = 0
     for pressure in PT_DATA:
         if (pressure > CRIT_P)
             emergency_shutdown()
             print('EMERGENCY SHUTDOWN: Critical Pressure detected')
+        i++
             
 ### OTHER FUNCTIONS ###
 
