@@ -14,6 +14,8 @@ except:
 CRIT_T = 309.5
 CRIT_P = 7240
 
+Is_Critical = False
+
 ### VARIABLES TO STORE SENSOR OBJECTS ###
 
 # Where load cell objects are stored
@@ -22,11 +24,11 @@ CRIT_P = 7240
 LOAD_CELLS = []
 
 # initialize TC objects and data
-TC = [] // ?
+TC = []   ## ?
 TC_DATA = []
 
 # initialize PT objects and data
-PT = [] // ?
+PT = []  ## ?
 PT_DATA = []
 
 def init():
@@ -48,7 +50,7 @@ def collectData():
     // change the critical checks to being a 2 state system so it doesnt continuiously call emergency shutdown
     i = 0
     for temp in TC_DATA:
-        if (temp > CRIT_T)
+        if (temp > CRIT_T and Is_Critical == 0)
             emergency_shutdown()
             print('EMERGENCY SHUTDOWN: Critical Temperature detected')
         i++
@@ -56,7 +58,7 @@ def collectData():
     PT_DATA = readPressureTransducers()
     i = 0
     for pressure in PT_DATA:
-        if (pressure > CRIT_P)
+        if (pressure > CRIT_P and Is_Critical == 0)
             emergency_shutdown()
             print('EMERGENCY SHUTDOWN: Critical Pressure detected')
         i++
