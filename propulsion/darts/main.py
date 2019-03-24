@@ -10,6 +10,8 @@ except:
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
 # LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN
 
+int CRIT_T = 309.5
+int CRIT_P = 7240
 
 ### VARIABLES TO STORE SENSOR OBJECTS ###
 
@@ -18,6 +20,13 @@ except:
 # use LOAD_CELLS[i].last_reading
 LOAD_CELLS = []
 
+# initialize TC objects and data
+TC = [] // ?
+TC_DATA = []
+
+# initialize PT objects and data
+PT = [] // ?
+PT_DATA = []
 
 def init():
     # Initialize load cell serial and GPIO, then instantiate load cell objects
@@ -33,9 +42,19 @@ def init():
 
 
 ### FUNCTIONS TO ITERATE THROUGH ALL SENSORS ###
-
-
-
+def collectData():
+    TC_DATA = readThermocouples()
+    for temp in TC_DATA:
+        if (temp > CRIT_T)
+            emergency_shutdown()
+            print('EMERGENCY SHUTDOWN: Critical Temperature detected')
+            
+    PT_DATA = readPressureTransducers()
+    for pressure in PT_DATA:
+        if (pressure > CRIT_P)
+            emergency_shutdown()
+            print('EMERGENCY SHUTDOWN: Critical Pressure detected')
+            
 ### OTHER FUNCTIONS ###
 
 # Tell ignition computer to close motorized ball valve.
