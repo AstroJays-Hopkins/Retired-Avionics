@@ -44,6 +44,7 @@ def init():
 ### FUNCTIONS TO ITERATE THROUGH ALL SENSORS ###
 def collectData():
     TC_DATA = readThermocouples()
+    // change the critical checks to being a 2 state system so it doesnt continuiously call emergency shutdown
     for temp in TC_DATA:
         if (temp > CRIT_T)
             emergency_shutdown()
