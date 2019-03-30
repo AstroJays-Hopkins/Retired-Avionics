@@ -52,6 +52,7 @@ def collectData():
     for temp in TC_DATA:
         if (temp > CRIT_T and Is_Critical == 0)
             emergency_shutdown()
+            Is_Critical = 1
             print('EMERGENCY SHUTDOWN: Critical Temperature detected')
         i++
             
@@ -60,6 +61,7 @@ def collectData():
     for pressure in PT_DATA:
         if (pressure > CRIT_P and Is_Critical == 0)
             emergency_shutdown()
+            Is_Critical = 1
             print('EMERGENCY SHUTDOWN: Critical Pressure detected')
         i++
             
