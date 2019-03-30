@@ -22,7 +22,7 @@ except:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
     
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
-# LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN
+# LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN, PT_CHANNELS, TC_CS_PINS
 
 CRIT_T = 309.5
 CRIT_P = 7240
@@ -39,17 +39,29 @@ BALLVALVE = False # false for closed true for open
 LOAD_CELLS = []
 
 # initialize TC objects and data
-TC = []   ## ?
+TCs = []   ## ?
 
 # initialize PT objects and data
-PT = []  ## ?
+PTs = []  ## ?
 
 def init():
     # Initialize load cell serial and GPIO, then instantiate load cell objects
     lc.begin()
     i = 0
     for select_tuple in LC_SEL_TUPLES:  ## soo... LC_SEL_TUPLES is supposed to come from that external configuration file, but I don't know how to do that yet...
-        LOAD_CELLS[i] = Load_Cell(select_tuple)
+        LOAD_CELLS[i] = lc.Load_Cell(select_tuple)
+        i++
+
+    # Initialize thermocouples
+    i = 0
+    for cs_pin in TC_CS_PINS:
+        TCs[i] = tc.Thermocouple(cs_pin)
+        i++
+
+    # Initialize PTs
+    i = 0
+    for pt_chan in PT_CHANNELS:
+        PTs[i] = pt.PressureTransducer(pt_chan)
         i++
 
     # Configure GPIO pin for telling the ignition computer to close the motorized ball valve in an emergency:
@@ -59,26 +71,26 @@ def init():
 
 ### FUNCTIONS TO ITERATE THROUGH ALL SENSORS ###
 def collectData():
-    data.append(tc.readThermocouples())
+    data.append(tc.readThermocouples(TCs))
     // change the critical checks to being a 2 state system so it doesnt # continuiously call emergency shutdown
     i = 0
-    for temp in TC_DATA:
-        if (temp > CRIT_T and Is_Critical == 0)
+    for thermocouple in TCs:
+        if (thermocouple.last_reading > CRIT_T and Is_Critical == 0)
             emergency_shutdown()
             Is_Critical = 1
             print('EMERGENCY SHUTDOWN: Critical Temperature detected')
         i++
             
-    data.append(pt.readPressureTransducers())
+    data.append(pt.readPressureTransducers(PTs))
     i = 0
-    for pressure in PT_DATA:
-        if (pressure > CRIT_P and Is_Critical == 0)
+    for pt in PTs:
+        if (pt.last_reading > CRIT_P and Is_Critical == 0)
             emergency_shutdown()
             Is_Critical = 1
             print('EMERGENCY SHUTDOWN: Critical Pressure detected')
         i++
         
-    data.append(readLC()) # change this 
+    data.append(read_load_cells(LOAD_CELLS)) # change this 
     
     data.append(getVentState()) #write these functions
       
