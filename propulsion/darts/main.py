@@ -14,6 +14,8 @@ import time
 import load_cell as lc
 import RocketThermocouple as tc
 import PressureTransducer as pt #change this
+import Vent as vent
+import QuickDisconnect as qd
 try:
     import RPi.GPIO as GPIO  # RPi.GPIO documentation: https://sourceforge.net/p/raspberry-gpio-python/wiki/
 except:
@@ -93,9 +95,11 @@ def emergency_shutdown():
 
 ## TODO##
 def getVentState():
+    return vent.get_state()
     
     #kjafsdf
 def getDisconnectState():
+    return qd.get_state()
     
     #kjadsflk
     
