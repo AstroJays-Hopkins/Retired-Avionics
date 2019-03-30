@@ -1,13 +1,26 @@
+## LAST UPDATE 03/30/2019 AT 12:45 PM ##
+## THIS IS UNFINISHED CODE PLS HELP ##
+## TODO LIST: ##
+# - function to read PTs -- ET TO FINISH
+# - function to read load cells -- GPS TO FINISH
+# - function to get vent state / actuate vent solenoid - RYAN
+# - function to get disconnect state / actuate disconnect solenoid - RYAN
+# - function to get ball valve state - COURTNEY
+# - function to detect if ignition command has been sent and if ball valve is open - COURTNEY
+
 from datetime import datetime
 from csv import writer
 import time
 import load_cell as lc
 import RocketThermocouple as tc
+import PressureTransducer as pt #change this
+import Vent as vent
+import QuickDisconnect as qd
 try:
     import RPi.GPIO as GPIO  # RPi.GPIO documentation: https://sourceforge.net/p/raspberry-gpio-python/wiki/
 except:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
-
+    
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
 # LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN
 
@@ -17,6 +30,8 @@ CRIT_P = 7240
 Is_Critical = False
 
 ### VARIABLES TO STORE SENSOR OBJECTS ###
+data = []
+BALLVALVE = False # false for closed true for open
 
 # Where load cell objects are stored
 # To access the last reading of an individual load cell i,
@@ -25,11 +40,9 @@ LOAD_CELLS = []
 
 # initialize TC objects and data
 TC = []   ## ?
-TC_DATA = []
 
 # initialize PT objects and data
 PT = []  ## ?
-PT_DATA = []
 
 def init():
     # Initialize load cell serial and GPIO, then instantiate load cell objects
@@ -46,8 +59,8 @@ def init():
 
 ### FUNCTIONS TO ITERATE THROUGH ALL SENSORS ###
 def collectData():
-    TC_DATA = tc.readThermocouples()
-    // change the critical checks to being a 2 state system so it doesnt continuiously call emergency shutdown
+    data.append(tc.readThermocouples())
+    // change the critical checks to being a 2 state system so it doesnt # continuiously call emergency shutdown
     i = 0
     for temp in TC_DATA:
         if (temp > CRIT_T and Is_Critical == 0)
@@ -56,7 +69,7 @@ def collectData():
             print('EMERGENCY SHUTDOWN: Critical Temperature detected')
         i++
             
-    PT_DATA = readPressureTransducers()
+    data.append(pt.readPressureTransducers())
     i = 0
     for pressure in PT_DATA:
         if (pressure > CRIT_P and Is_Critical == 0)
@@ -64,6 +77,14 @@ def collectData():
             Is_Critical = 1
             print('EMERGENCY SHUTDOWN: Critical Pressure detected')
         i++
+        
+    data.append(readLC()) # change this 
+    
+    data.append(getVentState()) #write these functions
+      
+    data.append(getDisconnectState()) # write these functions 
+    
+    data.append(getBallValveState()) # write these 
             
 ### OTHER FUNCTIONS ###
 
@@ -71,19 +92,34 @@ def collectData():
 # Doesn't actually close the valve (that's the igcomp's job) --- hence the name
 def emergency_shutdown():
     GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, True)
+    BALLVALVE = False
 ## FIXME MAYBE?  Should we have a function to order the igcomp to open the ball valve?
 
-
+## TODO##
+def getVentState():
+    return vent.get_state()
+    
+    #kjafsdf
+def getDisconnectState():
+    return qd.get_state()
+    
+    #kjadsflk
+    
+def getBallValveState():
+    
+    #klajdf
+    
+# def: we need a function here to actuate the vent and disconnect when their buttons are pressed - change the state of the solenoids
 
 ### DATA LOGGING AND TRANSMISSION ###
 
 #Writes data
 def writedata(args):
-    data = []
-    data.append(datetime.now())
+    packet = []
+    packet.append(datetime.now())
     for i in range(0,len(args)):
-        data.append(args[i])
-    data_writer.writerow(data)
+        packet.append(args[i])
+    data_writer.writerow(packet)
 
 ## There used to be an ' import csv ' statement here and ' writer(log) ' was ' csv.writer(log) '
 with open('DATA1.csv','a',newline='') as log:
@@ -95,5 +131,6 @@ with open('DATA1.csv','a',newline='') as log:
     while True:
         #collect all data here and assign to variables
         #slam all that shite into the writedata function (or append to a list each time a sensor is read)
-        writedata([0,1,2,3])
+        writedata(data)
         time.sleep(0.01)
+        data = []
