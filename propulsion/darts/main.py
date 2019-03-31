@@ -31,6 +31,8 @@ Is_Critical = False
 ### VARIABLES TO STORE SENSOR OBJECTS ###
 data = []
 BALLVALVE = False # false for closed true for open
+QDSTATE = False # false for closed true for open
+VENTVALVE = False # false for closed true for open
 
 # Where load cell objects are stored
 # To access the last reading of an individual load cell i,
@@ -91,11 +93,11 @@ def collectData():
         
     data.append(read_load_cells(LOAD_CELLS)) # change this 
     
-    data.append(getVentState()) #write these functions
+    data.append(VENTVALVE) 
       
-    data.append(getDisconnectState()) # write these functions 
+    data.append(QDSTATE)
     
-    data.append(getBallValveState()) # write these 
+    data.append(BALLVALVE) 
             
 ### OTHER FUNCTIONS ###
 
@@ -104,30 +106,22 @@ def collectData():
 def emergency_shutdown():
     GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, True)
     BALLVALVE = False
+	return BALLVALVE
     Vent()
     
+# Tell ignition computer to open venting solenoid
 def Vent():
 	GPIO.output(VENT_VALVE_SHUTOFF_PIN, True)
-	VENTVALVE = False   
+	VENTVALVE = True
+	return VENTVALVE
 ## FIXME MAYBE?  Should we have a function to order the igcomp to open the ball valve?
 
 ## TODO##
-def getVentState():
-    return vent.get_state()
-    
-    #kjafsdf
 def getDisconnectState():
     return qd.get_state()
     
     #kjadsflk  
-def getBallValveState():
-    
-    #klajdf
-    
-def Vent():
-	GPIO.output(VENT_VALVE_SHUTOFF_PIN, True)
-	VENTVALVE = False
-    
+	
 ### DATA LOGGING AND TRANSMISSION ###
 
 #Writes data
