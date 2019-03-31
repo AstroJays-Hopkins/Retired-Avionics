@@ -14,7 +14,6 @@ import time
 import load_cell as lc
 import RocketThermocouple as tc
 import PressureTransducer as pt #change this
-import Vent as vent
 import QuickDisconnect as qd
 try:
     import RPi.GPIO as GPIO  # RPi.GPIO documentation: https://sourceforge.net/p/raspberry-gpio-python/wiki/
@@ -22,7 +21,7 @@ except:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
     
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
-# LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN, PT_CHANNELS, TC_CS_PINS
+# LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN, VENT_VALVE_SHUTOFF_PIN, PT_CHANNELS, TC_CS_PINS
 
 CRIT_T = 309.5
 CRIT_P = 7240
@@ -105,6 +104,11 @@ def collectData():
 def emergency_shutdown():
     GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, True)
     BALLVALVE = False
+    Vent()
+    
+def Vent():
+	GPIO.output(VENT_VALVE_SHUTOFF_PIN, True)
+	VENTVALVE = False   
 ## FIXME MAYBE?  Should we have a function to order the igcomp to open the ball valve?
 
 ## TODO##
@@ -115,14 +119,15 @@ def getVentState():
 def getDisconnectState():
     return qd.get_state()
     
-    #kjadsflk
-    
+    #kjadsflk  
 def getBallValveState():
     
     #klajdf
     
-# def: we need a function here to actuate the vent and disconnect when their buttons are pressed - change the state of the solenoids
-
+def Vent():
+	GPIO.output(VENT_VALVE_SHUTOFF_PIN, True)
+	VENTVALVE = False
+    
 ### DATA LOGGING AND TRANSMISSION ###
 
 #Writes data
