@@ -3,10 +3,8 @@
 ## TODO LIST: ##
 # - function to read PTs -- ET TO FINISH
 # - function to read load cells -- GPS TO FINISH
-# - function to get vent state / actuate vent solenoid - RYAN
-# - function to get disconnect state / actuate disconnect solenoid - RYAN
-# - function to get ball valve state - COURTNEY
-# - function to detect if ignition command has been sent and if ball valve is open - COURTNEY
+# FUNCTION TO READ COMMANDS FROM WIFI AND PROCESS THEM - VENT / DISCONNECT !!!!!!!
+
 
 from datetime import datetime
 from csv import writer
@@ -21,7 +19,7 @@ except:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
     
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
-# LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN, VENT_VALVE_SHUTOFF_PIN, PT_CHANNELS, TC_CS_PINS
+# LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN, VENT_VALVE_SHUTOFF_PIN, PT_CHANNELS, TC_CS_PINS, MBVALVE_DETECT_PIN, 
 
 CRIT_T = 309.5
 CRIT_P = 7240
@@ -30,7 +28,6 @@ Is_Critical = False
 
 ### VARIABLES TO STORE SENSOR OBJECTS ###
 data = []
-BALLVALVE = False # false for closed true for open
 QDSTATE = False # false for closed true for open
 VENTVALVE = False # false for closed true for open
 
@@ -67,6 +64,7 @@ def init():
 
     # Configure GPIO pin for telling the ignition computer to close the motorized ball valve in an emergency:
     GPIO.setup(EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT)
+    GPIO.setup(MBVALVE_DETECT_PIN, GPIO.IN)
     GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, False)
 
 
@@ -97,16 +95,14 @@ def collectData():
       
     data.append(QDSTATE)
     
-    data.append(BALLVALVE) 
+    data.append(getBallValveState()) 
             
 ### OTHER FUNCTIONS ###
 
 # Tell ignition computer to close motorized ball valve.
 # Doesn't actually close the valve (that's the igcomp's job) --- hence the name
 def emergency_shutdown():
-    GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, True)
-    BALLVALVE = False
-	return BALLVALVE
+    GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, True) #this needs to be a actuate ball valve function on its own
     Vent()
     
 # Tell ignition computer to open venting solenoid
@@ -119,6 +115,9 @@ def Vent():
 ## TODO##
 def getDisconnectState():
     return qd.get_state()
+
+def getBallValveState():
+	return GPIO.input(MBVALVE_DETECT_PIN)
     
     #kjadsflk  
 	
