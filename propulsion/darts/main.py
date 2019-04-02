@@ -8,6 +8,7 @@
 
 from datetime import datetime
 from csv import writer
+from adafruit_ads1x15.ads1115 import P0,P1,P2,P3
 import time
 import load_cell as lc
 import RocketThermocouple as tc
@@ -19,7 +20,12 @@ except:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
     
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
-# LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN, VENT_VALVE_SHUTOFF_PIN, PT_CHANNELS, TC_CS_PINS, MBVALVE_DETECT_PIN, 
+EMERG_MBVALVE_SHUTOFF_PIN = [25]
+MBVALVE_DETECT_PIN = [12]
+VENT_VALVE_SHUTOFF_PIN = [16]
+VENT_VALVE_DETECT_PIN = [26]
+PT_CHANNELS = [P0,P1,P2]
+TC_CS_PINS = [11,13,15,29,31,33]
 
 CRIT_T = 309.5
 CRIT_P = 7240
@@ -71,7 +77,7 @@ def init():
 ### FUNCTIONS TO ITERATE THROUGH ALL SENSORS ###
 def collectData():
     data.append(tc.readThermocouples(TCs))
-    // change the critical checks to being a 2 state system so it doesnt # continuiously call emergency shutdown
+    # change the critical checks to being a 2 state system so it doesnt continuiously call emergency shutdown
     i = 0
     for thermocouple in TCs:
         if (thermocouple.last_reading > CRIT_T and Is_Critical == 0)
