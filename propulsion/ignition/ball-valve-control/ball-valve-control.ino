@@ -21,6 +21,10 @@
  *   Ch. B --> Digital 3
  */
 
+//Commands will be sent via 915MHz radio communication
+#include <SPI.h>
+#include <LoRa.h>
+
 /* *** MOTOR RELAY PINS, CONTROL FUNCTIONS *** */
 
 // Signal pin to relay that is currently powering motor.  If no relay is
@@ -93,27 +97,39 @@ void check_rotation_and_stop_if_needed () {
 }
 
 void setup() {
+  /* Initialize radio communication protocol */
+  LoRa.begin(915E6);
+  
   /* Initialize Hall effect pulse counter interrupts */
   attachInterrupt(digitalPinToInterrupt(2), increment_channel_a, RISING);
   attachInterrupt(digitalPinToInterrupt(3), increment_channel_b, RISING);
+  
   /* Initialize relay signal pins */
   pinMode(MOTOR_FORWARD_RELAY_PIN, OUTPUT);
   pinMode(MOTOR_REVERSE_RELAY_PIN, OUTPUT);
+  
   // For testing:
   Serial.begin(9600);
 }
 
 void loop() {
   // Put code in to activate relays upon request.
-  if (Serial.available()) {
-    char command_char = Serial.read();
-    switch (command_char) {
-    case 'F': 
-      turn_motor_on_forward();
-      break;
-    case 'R':
-      turn_motor_on_reverse();
-      break;
+  char command_char;
+  int packetSize = LoRa.parsePacket();
+  if (packetSize) {
+    while (LoRa.available()) {
+      command_char = LoRa.read();
+      Serial.println(command_char);
     }
+  }
+  switch (command_char) {
+  case 'F': 
+    Serial.println("FORWARD");
+    turn_motor_on_forward();
+    break;
+  case 'R':
+    Serial.println("REVERSE");
+    turn_motor_on_reverse();
+    break;
   }
 }
