@@ -4,7 +4,7 @@ try:
 except:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
 
-SELECT_GPIO_PIN_TUPLE = (16,18)  ## TEMPORARY VALUES.  CHANGE AS NEEDED.
+SELECT_GPIO_PIN_TUPLE = (23,24)  ## TEMPORARY VALUES.  CHANGE AS NEEDED.
 DESELECT_TUPLE = (1,1)  ## Corresponds to C3 pins on the MUX, which are grounded and will read nothing.
 
 ## Set pin numbering scheme to correspond to numbers printed on board
