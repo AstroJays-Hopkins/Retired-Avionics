@@ -3,15 +3,14 @@
 ## TODO LIST: ##
 # - function to read PTs -- ET TO FINISH
 # - function to read load cells -- GPS TO FINISH
-# FUNCTION TO READ COMMANDS FROM WIFI AND PROCESS THEM - VENT / DISCONNECT !!!!!!!
-
+# - FUNCTION TO READ COMMANDS FROM WIFI AND PROCESS THEM - VENT / DISCONNECT !!!!!!!
 
 from datetime import datetime
 from csv import writer
 import time
 import load_cell as lc
 import RocketThermocouple as tc
-import PressureTransducer as pt #change this
+import pressure_transducer as pt #change this
 import QuickDisconnect as qd
 try:
     import RPi.GPIO as GPIO  # RPi.GPIO documentation: https://sourceforge.net/p/raspberry-gpio-python/wiki/
@@ -35,32 +34,33 @@ VENTVALVE = False # false for closed true for open
 # To access the last reading of an individual load cell i,
 # use LOAD_CELLS[i].last_reading
 LOAD_CELLS = []
+global Ser     # Serial port
 
-# initialize TC objects and data
-TCs = []   ## ?
+# Place to put TC objects
+TCs = []
 
-# initialize PT objects and data
-PTs = []  ## ?
+# Place to put PT objects
+PTs = []
 
 def init():
     # Initialize load cell serial and GPIO, then instantiate load cell objects
-    lc.begin()
+    Ser = lc.begin()
     i = 0
     for select_tuple in LC_SEL_TUPLES:  ## soo... LC_SEL_TUPLES is supposed to come from that external configuration file, but I don't know how to do that yet...
-        LOAD_CELLS[i] = lc.Load_Cell(select_tuple)
-        i++
+        LOAD_CELLS[i] = lc.Load_Cell(select_tuple, Ser)
+        i += 1
 
     # Initialize thermocouples
     i = 0
     for cs_pin in TC_CS_PINS:
         TCs[i] = tc.Thermocouple(cs_pin)
-        i++
+        i += 1
 
     # Initialize PTs
     i = 0
     for pt_chan in PT_CHANNELS:
         PTs[i] = pt.PressureTransducer(pt_chan)
-        i++
+        i += 1
 
     # Configure GPIO pin for telling the ignition computer to close the motorized ball valve in an emergency:
     GPIO.setup(EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT)
@@ -71,23 +71,23 @@ def init():
 ### FUNCTIONS TO ITERATE THROUGH ALL SENSORS ###
 def collectData():
     data.append(tc.readThermocouples(TCs))
-    // change the critical checks to being a 2 state system so it doesnt # continuiously call emergency shutdown
+    ## change the critical checks to being a 2 state system so it doesnt # continuiously call emergency shutdown
     i = 0
     for thermocouple in TCs:
-        if (thermocouple.last_reading > CRIT_T and Is_Critical == 0)
+        if (thermocouple.last_reading > CRIT_T and Is_Critical == 0):
             emergency_shutdown()
             Is_Critical = 1
             print('EMERGENCY SHUTDOWN: Critical Temperature detected')
-        i++
+        i += 1
             
     data.append(pt.readPressureTransducers(PTs))
     i = 0
     for pt in PTs:
-        if (pt.last_reading > CRIT_P and Is_Critical == 0)
+        if (pt.last_reading > CRIT_P and Is_Critical == 0):
             emergency_shutdown()
             Is_Critical = 1
             print('EMERGENCY SHUTDOWN: Critical Pressure detected')
-        i++
+        i += 1
         
     data.append(read_load_cells(LOAD_CELLS)) # change this 
     

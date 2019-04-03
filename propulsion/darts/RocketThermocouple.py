@@ -15,7 +15,7 @@ import Adafruit_MAX31855.MAX31855 as MAX31855
 CLK = 25
 CS  = 24
 DO  = 18
-sensor = MAX31855.MAX31855(CLK, CS, DO)
+# sensor = MAX31855.MAX31855(CLK, CS, DO)
 
 # Raspberry Pi hardware SPI configuration.
 #SPI_PORT   = 0
@@ -23,7 +23,7 @@ sensor = MAX31855.MAX31855(CLK, CS, DO)
 #sensor = MAX31855.MAX31855(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE))
 
 
-class Thermocouple(MAX31855):
+class Thermocouple(MAX31855.MAX31855):
     def __init__(self, cs_pin):
         super(Thermocouple, self).__init__(CLK, cs_pin, DO)
         self.last_reading = -1
@@ -44,5 +44,5 @@ def readThermocouples(rocketThermocouples):
     i = 0
     for sensor in rocketThermocouples:
         data[i] = sensor.readTempC()
-        i++
+        i += 1
     return data 

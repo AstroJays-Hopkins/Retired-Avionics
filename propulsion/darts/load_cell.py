@@ -17,11 +17,11 @@ def begin():
     GPIO.setup(SELECT_GPIO_PIN_TUPLE, GPIO.OUT)
     GPIO.setup(self.muxsel_pin, GPIO.OUT)  # set GPIO pin as output
     # Initialise serial
-    global ser
     try:                                                        # 1 s timeout
         ser = serial.Serial(port="/dev/serial0", baudrate=9600, timeout=1)
+        return ser
     except (OSError, serial.SerialException):
-        print "init_load_cell_serial_port(): Serial '" + str(serialPort) + "' did not connect"
+        print ("init_load_cell_serial_port(): Serial " + str(serialPort) + " did not connect")
         return -1
 
 def end():
@@ -32,12 +32,13 @@ def end():
 # everything organized.
 class Load_Cell:
     # Just another access point for the serial port used to read load cell data
-    serial_port = ser
+    serial_port = False
 
     # select_tuple is a tuple of bits written to A and B of the MUX to select the Tx/Rx lines of the the load cell
-    def __init__(self, select_tuple):
+    def __init__(self, select_tuple, serport):
         self.select_tuple = select_tuple  # GPIO pin to raise in order to read load cell
         self.last_reading = -1
+        serial_port = serport
 
     def select(self):
         GPIO.output(SELECT_GPIO_PIN_TUPLE, self.select_tuple)
@@ -78,5 +79,5 @@ def read_load_cells(load_cell_list):
     weights = []
     for load_cell in load_cell_list:
         weights[i] = load_cell.read_weight()
-        i++
+        i += 1
     return weights
