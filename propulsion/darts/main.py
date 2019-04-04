@@ -13,7 +13,7 @@ from csv import writer
 import time
 import load_cell as lc
 import RocketThermocouple as tc
-import PressureTransducer as pt #change this
+import pressure_transducer as pt #change this
 import Vent as vent
 import QuickDisconnect as qd
 try:
