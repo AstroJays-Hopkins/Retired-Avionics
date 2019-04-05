@@ -3,18 +3,19 @@
 ## TODO LIST: ##
 # - function to read PTs -- ET TO FINISH
 # - function to read load cells -- GPS TO FINISH
-# - function to get vent state / actuate vent solenoid - RYAN
-# - function to get disconnect state / actuate disconnect solenoid - RYAN
-# - function to get ball valve state - COURTNEY
-# - function to detect if ignition command has been sent and if ball valve is open - COURTNEY
+# - FUNCTION TO READ COMMANDS FROM WIFI AND PROCESS THEM - VENT / DISCONNECT !!!!!!!
 
 from datetime import datetime
 from csv import writer
+from adafruit_ads1x15.ads1115 import P0,P1,P2,P3
 import time
 import load_cell as lc
 import RocketThermocouple as tc
 import pressure_transducer as pt #change this
+<<<<<<< HEAD
 import Vent as vent
+=======
+>>>>>>> 95a9e33e4ce085cc36233c849978621c7130c27e
 import QuickDisconnect as qd
 try:
     import RPi.GPIO as GPIO  # RPi.GPIO documentation: https://sourceforge.net/p/raspberry-gpio-python/wiki/
@@ -22,7 +23,12 @@ except:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
     
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
-# LC_SEL_TUPLES, EMERG_MBVALVE_SHUTOFF_PIN, PT_CHANNELS, TC_CS_PINS
+EMERG_MBVALVE_SHUTOFF_PIN = [25]
+MBVALVE_DETECT_PIN = [12]
+VENT_VALVE_SHUTOFF_PIN = [16]
+VENT_VALVE_DETECT_PIN = [26]
+PT_CHANNELS = [P0,P1,P2]
+TC_CS_PINS = [17,27,22,5,6,13]
 
 CRIT_T = 309.5
 CRIT_P = 7240
@@ -31,98 +37,100 @@ Is_Critical = False
 
 ### VARIABLES TO STORE SENSOR OBJECTS ###
 data = []
-BALLVALVE = False # false for closed true for open
+QDSTATE = False # false for closed true for open
+VENTVALVE = False # false for closed true for open
 
 # Where load cell objects are stored
 # To access the last reading of an individual load cell i,
 # use LOAD_CELLS[i].last_reading
 LOAD_CELLS = []
+global Ser     # Serial port
 
-# initialize TC objects and data
-TCs = []   ## ?
+# Place to put TC objects
+TCs = []
 
-# initialize PT objects and data
-PTs = []  ## ?
+# Place to put PT objects
+PTs = []
 
 def init():
     # Initialize load cell serial and GPIO, then instantiate load cell objects
-    lc.begin()
+    Ser = lc.begin()
     i = 0
     for select_tuple in LC_SEL_TUPLES:  ## soo... LC_SEL_TUPLES is supposed to come from that external configuration file, but I don't know how to do that yet...
-        LOAD_CELLS[i] = lc.Load_Cell(select_tuple)
-        i++
+        LOAD_CELLS[i] = lc.Load_Cell(select_tuple, Ser)
+        i += 1
 
     # Initialize thermocouples
     i = 0
     for cs_pin in TC_CS_PINS:
         TCs[i] = tc.Thermocouple(cs_pin)
-        i++
+        i += 1
 
     # Initialize PTs
     i = 0
     for pt_chan in PT_CHANNELS:
         PTs[i] = pt.PressureTransducer(pt_chan)
-        i++
+        i += 1
 
     # Configure GPIO pin for telling the ignition computer to close the motorized ball valve in an emergency:
     GPIO.setup(EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT)
+    GPIO.setup(MBVALVE_DETECT_PIN, GPIO.IN)
     GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, False)
 
 
 ### FUNCTIONS TO ITERATE THROUGH ALL SENSORS ###
 def collectData():
     data.append(tc.readThermocouples(TCs))
-    // change the critical checks to being a 2 state system so it doesnt # continuiously call emergency shutdown
+    ## change the critical checks to being a 2 state system so it doesnt # continuiously call emergency shutdown
     i = 0
     for thermocouple in TCs:
-        if (thermocouple.last_reading > CRIT_T and Is_Critical == 0)
+        if (thermocouple.last_reading > CRIT_T and Is_Critical == 0):
             emergency_shutdown()
             Is_Critical = 1
             print('EMERGENCY SHUTDOWN: Critical Temperature detected')
-        i++
+        i += 1
             
     data.append(pt.readPressureTransducers(PTs))
     i = 0
     for pt in PTs:
-        if (pt.last_reading > CRIT_P and Is_Critical == 0)
+        if (pt.last_reading > CRIT_P and Is_Critical == 0):
             emergency_shutdown()
             Is_Critical = 1
             print('EMERGENCY SHUTDOWN: Critical Pressure detected')
-        i++
+        i += 1
         
     data.append(read_load_cells(LOAD_CELLS)) # change this 
     
-    data.append(getVentState()) #write these functions
+    data.append(VENTVALVE) 
       
-    data.append(getDisconnectState()) # write these functions 
+    data.append(QDSTATE)
     
-    data.append(getBallValveState()) # write these 
+    data.append(getBallValveState()) 
             
 ### OTHER FUNCTIONS ###
 
 # Tell ignition computer to close motorized ball valve.
 # Doesn't actually close the valve (that's the igcomp's job) --- hence the name
 def emergency_shutdown():
-    GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, True)
-    BALLVALVE = False
+    GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, True) #this needs to be a actuate ball valve function on its own
+    Vent()
+    
+# Tell ignition computer to open venting solenoid
+def Vent():
+	GPIO.output(VENT_VALVE_SHUTOFF_PIN, True)
+	VENTVALVE = True
+	return VENTVALVE
 ## FIXME MAYBE?  Should we have a function to order the igcomp to open the ball valve?
 
 ## TODO##
-def getVentState():
-    return vent.get_state()
-    
-    #kjafsdf
 def getDisconnectState():
     return qd.get_state()
-    
-    #kjadsflk
-    
-def getBallValveState():
-    
-    #klajdf
-    
-# def: we need a function here to actuate the vent and disconnect when their buttons are pressed - change the state of the solenoids
 
+def getBallValveState():
+	return GPIO.input(MBVALVE_DETECT_PIN)
+    
+    #kjadsflk  
+	
 ### DATA LOGGING AND TRANSMISSION ###
 
 #Writes data

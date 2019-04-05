@@ -24,5 +24,5 @@ def readPressureTransducers(PTArray):
     i = 0
     for sensor in rocketThermocouples:
         data[i] = sensor.readPressure()
-        i++
+        i += 1
     return data 
