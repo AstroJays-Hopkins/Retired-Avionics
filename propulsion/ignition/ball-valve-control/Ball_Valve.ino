@@ -35,9 +35,18 @@ int Active_Relay_Pin = 0;
 // is connected to the motor backwards to spin it in reverse.
 const int MOTOR_FORWARD_RELAY_PIN = 5;
 const int MOTOR_REVERSE_RELAY_PIN = 6;
+// Forward opens; reverse closes
+// Signal pins to Pi.
+const int VALVE_MOVING_INDICATOR_PIN = 7;
+const int VALVE_STATE_INDICATOR_PIN = 8;
+// States for the above pins
+bool Valve_moving = LOW;  // If HIGH -> valve is moving; LOW -> not moving
+bool Valve_state = LOW;   // HIGH -> open; LOW -> closed 
 
 void turn_motor_off () {
   digitalWrite(Active_Relay_Pin, LOW);
+  Valve_moving = LOW;
+  digitalWrite(VALVE_MOVING_INDICATOR_PIN, LOW);
   Active_Relay_Pin = 0;
 }
 
@@ -48,6 +57,9 @@ void turn_motor_on_forward () {
   }
   digitalWrite(MOTOR_FORWARD_RELAY_PIN, HIGH);
   Active_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
+  // Set valve moving state and pin
+  Valve_moving = HIGH;
+  digitalWrite(VALVE_MOVING_INDICATOR_PIN, HIGH);
 }  
 
 void turn_motor_on_reverse () {
@@ -57,6 +69,9 @@ void turn_motor_on_reverse () {
   }
   digitalWrite(MOTOR_REVERSE_RELAY_PIN, HIGH);
   Active_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
+  // Set valve state and pin
+  Valve_moving = HIGH;
+  digitalWrite(VALVE_MOVING_INDICATOR_PIN, HIGH);
 }
 
 /* *** MOTOR HALL EFFECT ENCODER *** */
@@ -93,6 +108,9 @@ void check_rotation_and_stop_if_needed () {
     /* Shut off motor if that's the case. */
     turn_motor_off();
     reset_pulse_count();
+    if (Active_Relay_Pin == MOTOR_REVERSE_RELAY_PIN) { 
+      
+    }
   }
 }
 
