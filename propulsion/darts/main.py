@@ -1,7 +1,6 @@
-## LAST UPDATE 04/03/2019 AT 11:45 PM ##
-## THIS IS UNFINISHED CODE PLS HELP ##
+## LAST UPDATE 04/05/2019 AT 1:45 AM ##
+## THIS IS UNFINISHED CODE PLS HELP ? ##
 ## TODO LIST: ##
-# - FUNCTION TO READ COMMANDS FROM WIFI AND PROCESS THEM - VENT / DISCONNECT !!!!!!!
 
 from datetime import datetime
 from csv import writer
@@ -21,12 +20,13 @@ except:
     print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
     
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
-#spi = busio.SPI(board.SCK_1, MOSI=board.MOSI_1, MISO=board.MISO_1)
+## --> No undefined variables  :)
 
 ### BLASTED PINS FOR SENSORS AND DETECTION WHATNOT ###
 
 EMERG_MBVALVE_SHUTOFF_PIN = 25
 MBVALVE_DETECT_PIN = 12
+MBVALVE_ACTUATING_DETECT_PIN = -1  ## CHANGE
 DISCONNECT_DETECT_PIN = 16
 # VENT_VALVE_SHUTOFF_PIN = [16]
 VENT_VALVE_DETECT_PIN = 26
@@ -76,30 +76,28 @@ def init():
 
     # Configure GPIO pin for telling the ignition computer to close the motorized ball valve in an emergency:
     GPIO.setup(EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT)
-    GPIO.setup(MBVALVE_DETECT_PIN, GPIO.IN)
     GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, False)
-
+    GPIO.setup(MBVALVE_DETECT_PIN, GPIO.IN)
+    GPIO.setup(MBVALVE_ACTUATING_DETECT_PIN, GPIO.IN)
     # Configure vent GPIO pins
     GPIO.setup(VENT_VALVE_DETECT_PIN, GPIO.IN)
-    # GPIO.setup(VENT_VALVE_SHUTOFF_PIN, GPIO.OUT)   # Not used for cold flowa
+    ## GPIO.setup(VENT_VALVE_SHUTOFF_PIN, GPIO.OUT)   # Not used for cold flow
     GPIO.setup(DISCONNECT_DETECT_PIN, GPIO.IN)
 
-    # # Start server listening on port 12345 to communicate with operator console (GUI).
-    # Server.serverSetup()
-    # threading.Thread(target=send_data_upon_request()).start()
 
-### FUNCTIONS TO ITERATE THROUGH ALL SENSORS ###
+
+### FUNCTION TO ITERATE THROUGH ALL SENSORS ###
+
 def collectData():
     try:
         global Is_Critical
         global data
         # See here for why we need the above line: https://stackoverflow.com/questions/10851906/python-3-unboundlocalerror-local-variable-referenced-before-assignment#10852003
         data = data + tc.readThermocouples(TCs)
-        ## change the critical checks to being a 2 state system so it doesnt # continuiously call emergency shutdown
         for thermocouple in TCs:
             if (thermocouple.last_reading > CRIT_T and Is_Critical == False):
                 emergency_shutdown()
-                Is_Critical = 1
+                Is_Critical = 1  ## this prevents Pi from continuously calling emergency_shutdown() during a critical condition --- just calls it once.
                 print('EMERGENCY SHUTDOWN: Critical Temperature detected')
             
         data = data + pt.readPressureTransducers(PTs)
@@ -144,6 +142,9 @@ def getDisconnectState():
 def getBallValveState():
     return GPIO.input(MBVALVE_DETECT_PIN)
 
+# Checks pin from Arduino indicating if the ball valve is being actuated.
+def getBallValveMovingState():
+    return GPIO.input(MBVALVE_ACTUATING_DETECT_PIN)
     
 ### DATA LOGGING AND TRANSMISSION ###
 
@@ -160,20 +161,23 @@ with open('DATA1.csv','a',newline='') as log:
     data_writer = writer(log)
 
     #Header row so you know what you're looking at (change as necessary)
-    data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','VentValve','FuelValve','BallValve'])
+    data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','VentValve','FuelValve','BallValve','BallValveActuating'])
 
     try:
         init()
     except Exception as e:
         print("Error in init()")
+    print("!!!!!!!!!!!!!!!!
+DO BE AWARE that there is an extra value printed to the terminal that indicates whether or not the ball valve is actuating.  This extra value is also recorded to the Pi's data file.  This extra value IS NOT TRANSMITTED to the Flask server or GUI.
+!!!!!!!!!!!!!!!!")
     while True:
         #collect all data here and assign to variables
         #slam all that shite into the writedata function (or append to a list each time a sensor is read)
         collectData()
         try:
-            writedata(data)
+            writedata(data + [getBallValveMovingState()])
             sendData(data)
-            print(data)
+            print(data + [getBallValveMovingState()])
             time.sleep(0.01)
             data = []
         except Exception as e:

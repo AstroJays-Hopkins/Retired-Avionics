@@ -105,12 +105,19 @@ void increment_channel_b () {
 void check_rotation_and_stop_if_needed () {
   /* Checks to see if motor has spun 90 degrees */
   if ((Encoder_Pulse_Count[0] >= 329) && (Encoder_Pulse_Count[1] >= 329)) {
-    /* Shut off motor if that's the case. */
+    /* Update valve stat, shut off motor if that's the case. */
+    /* Change valve state variable --- must do so before turning off motor
+     * because turn_motor_off() resets Active_Relay_Pin. */
+    if (Active_Relay_Pin == MOTOR_REVERSE_RELAY_PIN) { 
+      Valve_state = LOW;  // motor was just finished running in reverse; valve is now closed.
+    } else if (Active_Relay_Pin == MOTOR_FORWARD_RELAY_PIN) {
+      Valve_state = HIGH;  // motor was just finished running forward; valve is now open.
+    }
+    // Update valve state indication pin to reflect changed state variable.
+    digitalWrite(VALVE_STATE_INDICATOR_PIN, Valve_state);
+    /* Shut off the motor */
     turn_motor_off();
     reset_pulse_count();
-    if (Active_Relay_Pin == MOTOR_REVERSE_RELAY_PIN) { 
-      
-    }
   }
 }
 
