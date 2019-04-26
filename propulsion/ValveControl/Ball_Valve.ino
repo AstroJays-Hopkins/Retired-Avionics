@@ -36,7 +36,7 @@ int Active_Relay_Pin = 0;
 const int MOTOR_FORWARD_RELAY_PIN = 5;
 const int MOTOR_REVERSE_RELAY_PIN = 6;
 // Forward opens; reverse closes
-// Signal pins to Pi.
+// Signal pins to Pi
 const int VALVE_MOVING_INDICATOR_PIN = 7;
 const int VALVE_STATE_INDICATOR_PIN = 8;
 // States for the above pins
