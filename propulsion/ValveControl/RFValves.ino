@@ -82,6 +82,7 @@ void loop() {
   }else if(rfInput[3] == "C"){
     DONE();
   }
+  
   if(rfInput[0] == "I"){
     CLOSE();
     Serial.println("FIRING");
