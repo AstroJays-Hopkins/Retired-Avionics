@@ -76,7 +76,7 @@ void loop() {
   Command1 = "X";
   Command2 = "X";
   Command3 = "X";
-  getCom();
+  getCom(); //check for desired states
   Serial.println(Command); //DEBUG: display what you sent as the command
   LoRa.beginPacket(); //start transmission
   LoRa.print(Command); //just gonna send it, asuhh dudes
