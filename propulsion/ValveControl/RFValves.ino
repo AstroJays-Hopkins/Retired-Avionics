@@ -6,9 +6,6 @@ const int ventRelay = 5;
 const int dcRelay = 6;
 const int resetRelay = 7;
 
-//set variable for received RF command
-String rfInput;
-
 void setup() {
   Serial.begin(9600);
   
@@ -19,11 +16,13 @@ void setup() {
   pinMode(ventRelay,OUTPUT);
   pinMode(dcRelay,OUTPUT);
   pinMode(resetRelay,OUTPUT);
+  pinMode(fuelRelay,OUTPUT);
 
   //set default relay states to LOW (default)
   digitalWrite(ventRelay,LOW);
   digitalWrite(dcRelay,LOW);
   digitalWrite(resetRelay,LOW);
+  digitalWrite(fuelRelay,LOW);
 }
 
 void vent() { //open venting solenoid
@@ -55,9 +54,13 @@ void CLOSE() { //close all valves
   digitalWrite(dcRelay,LOW);
   digitalWrite(resetRelay,LOW);
   digitalWrite(ventRelay,LOW);
+  digitalWrite(fuelRelay,LOW);
 }
 
 void loop() {
+  //set variable for received RF command
+  String rfInput;
+  
   int packetSize = LoRa.parsePacket();
   if (packetSize){ //receive RF commands
     while (LoRa.available()) {
