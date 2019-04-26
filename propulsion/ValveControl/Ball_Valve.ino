@@ -39,9 +39,12 @@ const int MOTOR_REVERSE_RELAY_PIN = 6;
 // Signal pins to Pi
 const int VALVE_MOVING_INDICATOR_PIN = 7;
 const int VALVE_STATE_INDICATOR_PIN = 8;
+const int ematch_pin = 9;
 // States for the above pins
 bool Valve_moving = LOW;  // If HIGH -> valve is moving; LOW -> not moving
 bool Valve_state = LOW;   // HIGH -> open; LOW -> closed 
+
+bool RECVD_IG_CMD = 0;
 
 void turn_motor_off () {
   digitalWrite(Active_Relay_Pin, LOW);
@@ -96,6 +99,10 @@ void increment_channel_b () {
   check_rotation_and_stop_if_needed();
 }
 
+bool ematch_continuity() { 
+  return !digitalRead(ematch_pin); 
+}
+
 /*
  * Gearbox between motor and ball valve has a 188:1 reduction ratio.  
  * To turn the ball valve \pi/2 radians, the motor has to spin 47 times.
@@ -140,6 +147,11 @@ void loop() {
     }
     Serial.println(command);
   }
+  
+  if (RECVD_IG_CMD == 1 && !ematch_continuity()) { 
+    delay(2650);
+    turn_motor_on_forward();
+  }
   char BVCommand = command[4]; //check ball valve desired state
   switch (BVCommand) { //set desired ball valve state
   case 'F': 
@@ -149,6 +161,17 @@ void loop() {
   case 'R':
     Serial.println("REVERSE");
     turn_motor_on_reverse();
+    break;
+  case 'I': 
+    Serial.println("RECVD IGNITION CMD...");
+      RECVD_IG_CMD = 1;
+//    delay(2650);
+//      if ematchPin=LOW {
+//        delay(2650);
+//    turn_motor_on_forward();
+    break;
+  case 'X':
+    Serial.println("HOLDING");
     break;
   }
 }
