@@ -29,6 +29,7 @@ void setup() {
   pinMode(dcSwitch, INPUT);
   pinMode(resetSwitch, INPUT);
   pinMode(fuelSwitch, INPUT);
+  pinMode(ignitionSwitch, INPUT);
 }
 
 void ventCom(){
