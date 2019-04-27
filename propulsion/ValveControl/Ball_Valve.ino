@@ -152,7 +152,7 @@ void loop() {
     delay(2650);
     turn_motor_on_forward();
   }
-  char BVCommand = command[4]; //check ball valve desired state
+  char BVCommand = command[0]; //check ball valve desired state
   switch (BVCommand) { //set desired ball valve state
   case 'F': 
     Serial.println("FORWARD");
