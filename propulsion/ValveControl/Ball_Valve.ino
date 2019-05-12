@@ -156,11 +156,7 @@ void loop() {
     delay(6500); //delay for however long we want the motor to burn for, 6.5 seconds being the most recent specified time
     turn_motor_on_reverse();
   }
-<<<<<<< HEAD
-  char BVCommand = command[0]; //check ball valve desired state
-=======
   char BVCommand = command[2]; //check ball valve desired state
->>>>>>> bbf4500f81efd14f476a7ddda08f642da1bb8f98
   switch (BVCommand) { //set desired ball valve state
   case 'F': 
     Serial.println("FORWARD");
