@@ -6,6 +6,9 @@ const int ventRelay = 5;
 const int dcRelay = 6;
 const int resetRelay = 7;
 
+//set variable for received RF command
+String rfInput;
+
 void setup() {
   Serial.begin(9600);
   
@@ -14,15 +17,13 @@ void setup() {
 
   //set relay pins to output voltage
   pinMode(ventRelay,OUTPUT);
-  pinMode(dcRelay,OUTPUT);
+  // pinMode(dcRelay,OUTPUT);
   pinMode(resetRelay,OUTPUT);
-  pinMode(fuelRelay,OUTPUT);
 
   //set default relay states to LOW (default)
   digitalWrite(ventRelay,LOW);
   digitalWrite(dcRelay,LOW);
   digitalWrite(resetRelay,LOW);
-  digitalWrite(fuelRelay,LOW);
 }
 
 void vent() { //open venting solenoid
@@ -30,15 +31,20 @@ void vent() { //open venting solenoid
   Serial.println("VENTING");
 }
 
-void DC() { //disconnect fueling line
-  digitalWrite(dcRelay,HIGH);
-  Serial.println("DISCONNECTING FUELING LINE");
+void stopvent() { // close venting solenoid
+  digitalWrite(ventRelay,HIGH);
+  Serial.println("NOT VENTING");
 }
 
-void RESET() { //reset fueling line linear actuator
-  digitalWrite(resetRelay,HIGH);
-  Serial.println("RESETTING FUELING LINE");
-}
+/* void DC() { //disconnect fueling line */
+/*   digitalWrite(dcRelay,HIGH); */
+/*   Serial.println("DISCONNECTING FUELING LINE"); */
+/* } */
+
+/* void RESET() { //reset fueling line linear actuator */
+/*   digitalWrite(resetRelay,HIGH); */
+/*   Serial.println("RESETTING FUELING LINE"); */
+/* } */
 
 void FUEL() { //open fueling valve
   digitalWrite(fuelRelay,HIGH);
@@ -51,16 +57,12 @@ void DONE() { //close fueling valve
 }
 
 void CLOSE() { //close all valves
-  digitalWrite(dcRelay,LOW);
-  digitalWrite(resetRelay,LOW);
-  digitalWrite(ventRelay,LOW);
   digitalWrite(fuelRelay,LOW);
+  // digitalWrite(resetRelay,LOW);
+  digitalWrite(ventRelay,LOW);
 }
 
 void loop() {
-  //set variable for received RF command
-  String rfInput;
-  
   int packetSize = LoRa.parsePacket();
   if (packetSize){ //receive RF commands
     while (LoRa.available()) {
@@ -69,26 +71,20 @@ void loop() {
   }
   Serial.println(rfInput); //DEBUG: display RF command
 
-  //Check states
-  if(rfInput[1] == "V"){
+  //set desired states for solenoids as determined by RF command
+  if(rfInput[0] == "V"){ //vent when indicated
     vent();
+  } else if (rfInput[0] == "X") {
+    stopvent();
   }
   
-  if(rfInput[2] == "D"){
-    DC();
-  }else if(rfInput[2] == "R"){
-    RESET();
-  }
-
-  if(rfInput[3] == "F"){
+  if(rfInput[1] == "O"){ //disconnect/reset fueling line adapter when desired
     FUEL();
-  }else if(rfInput[3] == "C"){
+  }else if(rfInput[1] == "C"){
     DONE();
   }
-  
-  if(rfInput[0] == "I"){
+
+  if(rfInput[2] == "I"){ //close all valves after ignition command is given
     CLOSE();
-    Serial.println("FIRING");
-    
   }
 }

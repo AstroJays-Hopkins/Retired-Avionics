@@ -132,6 +132,7 @@ void setup() {
   /* Initialize relay signal pins */
   pinMode(MOTOR_FORWARD_RELAY_PIN, OUTPUT);
   pinMode(MOTOR_REVERSE_RELAY_PIN, OUTPUT);
+  pinMode(ematch_pin, INPUT);
   
   // For testing:
   Serial.begin(9600);
@@ -149,10 +150,17 @@ void loop() {
   }
   
   if (RECVD_IG_CMD == 1 && !ematch_continuity()) { 
+    // digitalWrite(IGPIN,HIGH);
     delay(2650);
     turn_motor_on_forward();
+    delay(6500); //delay for however long we want the motor to burn for, 6.5 seconds being the most recent specified time
+    turn_motor_on_reverse();
   }
+<<<<<<< HEAD
   char BVCommand = command[0]; //check ball valve desired state
+=======
+  char BVCommand = command[2]; //check ball valve desired state
+>>>>>>> bbf4500f81efd14f476a7ddda08f642da1bb8f98
   switch (BVCommand) { //set desired ball valve state
   case 'F': 
     Serial.println("FORWARD");
@@ -164,11 +172,7 @@ void loop() {
     break;
   case 'I': 
     Serial.println("RECVD IGNITION CMD...");
-      RECVD_IG_CMD = 1;
-//    delay(2650);
-//      if ematchPin=LOW {
-//        delay(2650);
-//    turn_motor_on_forward();
+    RECVD_IG_CMD = 1;
     break;
   case 'X':
     Serial.println("HOLDING");

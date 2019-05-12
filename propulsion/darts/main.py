@@ -24,17 +24,23 @@ except:
 
 ### BLASTED PINS FOR SENSORS AND DETECTION WHATNOT ###
 
-EMERG_MBVALVE_SHUTOFF_PIN = 25
+EMERG_MBVALVE_SHUTOFF_PIN = 4 # what is this?
 MBVALVE_DETECT_PIN = 12
+<<<<<<< HEAD
+# DISCONNECT_DETECT_PIN = 16
+FUEL_SOLENOID_DETECT_PIN = 16
+VENT_VALVE_DETECT_PIN = 25
+EMATCH_DETECT_PIN = 13
+=======
 MBVALVE_ACTUATING_DETECT_PIN = -1  ## CHANGE
-DISCONNECT_DETECT_PIN = 16
-# VENT_VALVE_SHUTOFF_PIN = [16]
-VENT_VALVE_DETECT_PIN = 26
+>>>>>>> 4f659aedd34d7bbaff481178938729114804261b
 
-PT_CHANNELS = [P0,P1]  # ,P2]
+PT_CHANNELS = [P0,P1,P2]
 # TC_CS_PINS = [17,27,22,5,6,13]
-TC_CS_PINS = [board.D17,board.D27]
-LC_SEL_TUPLES = ((0, 0), None)  # ((0, 0), (1, 0), (0, 1))
+#TC_CS_PINS = [board.D17,board.D27]
+TC_CS_PINS = [board.D17, board.D27, board.D22, board.D5, board.D6, board.D26]
+#LC_SEL_TUPLES = ((0, 0), None)
+LC_SEL_TUPLES = ((0, 0), (0, 1), (1, 0))
 
 CRIT_T = 309.5
 CRIT_P = 7240.0
@@ -78,11 +84,12 @@ def init():
     GPIO.setup(EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT)
     GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, False)
     GPIO.setup(MBVALVE_DETECT_PIN, GPIO.IN)
-    GPIO.setup(MBVALVE_ACTUATING_DETECT_PIN, GPIO.IN)
+    GPIO.setup(MBVALVE_ACTUATING_DETECT_PIN, GPIO.IN)  ## USELESS?  Check belowdecks   avnoks  12 May 2019
     # Configure vent GPIO pins
     GPIO.setup(VENT_VALVE_DETECT_PIN, GPIO.IN)
-    ## GPIO.setup(VENT_VALVE_SHUTOFF_PIN, GPIO.OUT)   # Not used for cold flow
-    GPIO.setup(DISCONNECT_DETECT_PIN, GPIO.IN)
+    # GPIO.setup(DISCONNECT_DETECT_PIN, GPIO.IN)
+    GPIO.setup(FUEL_SOLENOID_DETECT_PIN, GPIO.IN)
+    GPIO.setup(EMATCH_DETECT_PIN, GPIO.IN)
 
 
 
@@ -107,11 +114,14 @@ def collectData():
                 Is_Critical = 1
                 print('EMERGENCY SHUTDOWN: Critical Pressure detected')
 
-        data = data + lc.read_load_cells(LOAD_CELLS)   ## commented out 2 Apr 2019 2247 EDT NIL for testing --- we don't know if serial works right now, so we're bypassing it.
-    
+        data = data + lc.read_load_cells(LOAD_CELLS)
+   #[*TC1 (Top), *TC2 (Bottom), TC3, TC4, TC5, TC6, *PT1 (Top), *PT2 (Bottom), PT3, *LC1 (NOX mass), LC2 (Thrust), LC3, *Sol1 (Fueling), *Sol2 (Venting), *Sol3 (Disconnect), *Sol4 (Reset), *Ballvalve, *Ignition]
+        data.append(getFuelSolState())
         data.append(getVentState())
-        data.append(getDisconnectState())
+        data = data + [0, 0]   # pads out spot that would have been occupied with disconnect/reset states
+        # data.append(getDisconnectState())
         data.append(getBallValveState())
+        data.append(getEmatchState())
     except Exception as e:
         print("!!! Error in colletData:")
         print(str(e))
@@ -133,15 +143,20 @@ def emergency_shutdown():
 
 ## FIXME MAYBE?  Should we have a function to order the igcomp to open the ball valve?
 
+def getFuelSolState():
+    return GPIO.input(FUEL_SOLENOID_DETECT_PIN)
+
 def getVentState():
     return GPIO.input(VENT_VALVE_DETECT_PIN)
 
-def getDisconnectState():
-    return GPIO.input(DISCONNECT_DETECT_PIN)
+# def getDisconnectState():
+#     return GPIO.input(DISCONNECT_DETECT_PIN)
 
 def getBallValveState():
     return GPIO.input(MBVALVE_DETECT_PIN)
 
+def getEmatchState():
+    return GPIO.input(EMATCH_DETECT_PIN)
 # Checks pin from Arduino indicating if the ball valve is being actuated.
 def getBallValveMovingState():
     return GPIO.input(MBVALVE_ACTUATING_DETECT_PIN)
@@ -161,8 +176,12 @@ with open('DATA1.csv','a',newline='') as log:
     data_writer = writer(log)
 
     #Header row so you know what you're looking at (change as necessary)
+<<<<<<< HEAD
+    data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','FuelValve','VentValve','Disconnect','Reset','BallValve','Ignition'])
+=======
     data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','VentValve','FuelValve','BallValve','BallValveActuating'])
 
+>>>>>>> 4f659aedd34d7bbaff481178938729114804261b
     try:
         init()
     except Exception as e:
