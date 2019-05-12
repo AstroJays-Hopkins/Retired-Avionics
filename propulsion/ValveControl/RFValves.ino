@@ -71,19 +71,13 @@ void loop() {
     vent();
   }
   
-  if(rfInput[1] == "D"){ //disconnect/reset fueling line adapter when desired
-    DC();
-  }else if(rfInput[1] == "R"){
-    RESET();
-  }
-
-  if(rfInput[2] == "F"){ //open/close fueling valve when desired
-    FUEL();
-  }else if(rfInput[2] == "C"){
+  if(rfInput[1] == "O"){ //disconnect/reset fueling line adapter when desired
+    FUEL;
+  }else if(rfInput[1] == "C"){
     DONE();
   }
 
-  if(rfInput[3] == "I"){ //close all valves after ignition command is given
+  if(rfInput[2] == "I"){ //close all valves after ignition command is given
     CLOSE();
   }
 }
