@@ -63,12 +63,14 @@ void fuelCom() {
 }
 
 void BV() {
-  if (digitalRead(BVForward == HIGH){
-    BV = "F"; //indicate ball valve was driven forward
-  }else if (digitalRead(BVReverse == HIGH){
-    BV = "R"; //indicate ball valve was driven in reverse
+  if (ignitionLock !=) {
+    if (digitalRead(BVForward == HIGH){
+      BV = "F"; //indicate ball valve was driven forward
+    }else if (digitalRead(BVReverse == HIGH){
+      BV = "R"; //indicate ball valve was driven in reverse
+    }
   }
-}
+ }
 
 void ignitionCom() {
   if (digitalRead(ignitionLock == HIGH){
