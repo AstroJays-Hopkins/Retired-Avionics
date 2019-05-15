@@ -42,7 +42,9 @@ const int VALVE_STATE_INDICATOR_PIN = 8;
 const int ematch_pin = 9;
 // States for the above pins
 bool Valve_moving = LOW;  // If HIGH -> valve is moving; LOW -> not moving
-bool Valve_state = LOW;   // HIGH -> open; LOW -> closed 
+bool Valve_state = LOW;   // HIGH -> open; LOW -> closed   
+int count = 0;
+
 
 bool RECVD_IG_CMD = 0;
 
@@ -144,17 +146,20 @@ void loop() {
   int packetSize = LoRa.parsePacket();
   if (packetSize) {
     while (LoRa.available()) { //get full RF command
-      command += LoRa.read();
+      command += (char)LoRa.read();
     }
     Serial.println(command);
   }
   
-  if (RECVD_IG_CMD == 1 && !ematch_continuity()) { 
+  if (RECVD_IG_CMD == 1 && !ematch_continuity() && count == 0) { 
     // digitalWrite(IGPIN,HIGH);
     delay(2650);
+    Serial.println("OPENING MOTOR");
     turn_motor_on_forward();
     delay(6500); //delay for however long we want the motor to burn for, 6.5 seconds being the most recent specified time
+    Serial.println("CLOSING MOTOR");
     turn_motor_on_reverse();
+    count++;
   }
   char BVCommand = command[2]; //check ball valve desired state
   switch (BVCommand) { //set desired ball valve state
@@ -167,8 +172,10 @@ void loop() {
     turn_motor_on_reverse();
     break;
   case 'I': 
-    Serial.println("RECVD IGNITION CMD...");
-    RECVD_IG_CMD = 1;
+    Serial.println("RECEIVED IGNITION CMD...");
+    if (count==0){
+      RECVD_IG_CMD = 1;
+    }
     break;
   case 'X':
     Serial.println("HOLDING");
