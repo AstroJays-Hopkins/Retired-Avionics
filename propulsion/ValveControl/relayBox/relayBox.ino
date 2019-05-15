@@ -1,7 +1,7 @@
 #include <LoRa.h>
 
 const int EMATCH_RELAY_PIN = 5;  // Connect to signal line of relay that switches firing current; change as needed.
-const int IGNITE_MAX_TIME = 2000 // Maximum time, in milliseconds, that relay is to be kept closed while attempting to light the ematch.
+const int IGNITE_MAX_TIME = 2000; // Maximum time, in milliseconds, that relay is to be kept closed while attempting to light the ematch.
 long int IgnitingStart = 0;  // Time relay to ignite ematch was closed
 
 void setup() {
