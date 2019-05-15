@@ -6,8 +6,8 @@ const int fuelSwitch = 4;
 const int ventSwitch = 5;
 
 //VARIABLES FOR IGNITION SAFETY AND BUTTON
-const int ignitionLock = 8;
-const int ignitionSwitch = 9;
+const int ignitionLock = 6;
+const int ignitionSwitch = 7;
 int tOpen = 0;
 
 //set variables for the condition of each switch
@@ -58,7 +58,7 @@ void BV() {
 
 void ignitionCom() {
   if (digitalRead(ignitionLock == HIGH)){
-    if (digitalRead(ignitionSwitch == HIGH)){
+    if (digitalRead(ignitionSwitch == LOW)){
       BValve = "I"; //indicate ignition variable was sent
     }
   }
