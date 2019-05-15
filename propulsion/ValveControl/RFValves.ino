@@ -6,12 +6,10 @@ const int ventRelay = 5;
 const int dcRelay = 6;
 const int resetRelay = 7;
 
-//set variable for received RF command
-String rfInput;
+
 
 void setup() {
   Serial.begin(9600);
-  
   //begin RF communication
   LoRa.begin(915E6);
 
@@ -25,7 +23,6 @@ void setup() {
   digitalWrite(dcRelay,LOW);
   digitalWrite(resetRelay,LOW);
 }
-
 void vent() { //open venting solenoid
   digitalWrite(ventRelay,HIGH);
   Serial.println("VENTING");
@@ -60,31 +57,35 @@ void CLOSE() { //close all valves
   digitalWrite(fuelRelay,LOW);
   // digitalWrite(resetRelay,LOW);
   digitalWrite(ventRelay,LOW);
+  Serial.println("ALL VALVES CLOSED");
 }
 
 void loop() {
+  //set variable for received RF command
+  String rfInput;
   int packetSize = LoRa.parsePacket();
   if (packetSize){ //receive RF commands
     while (LoRa.available()) {
       rfInput += (char)LoRa.read(); //append string with each solenoid state condition
     }  
   }
+  delay(1);
   Serial.println(rfInput); //DEBUG: display RF command
 
   //set desired states for solenoids as determined by RF command
-  if(rfInput[0] == "V"){ //vent when indicated
+  if(rfInput[0] == 'V'){ //vent when indicated
     vent();
-  } else if (rfInput[0] == "X") {
+  } else if (rfInput[0] == 'X') {
     stopvent();
   }
   
-  if(rfInput[1] == "O"){ //disconnect/reset fueling line adapter when desired
+  if(rfInput[1] == 'O'){ //disconnect/reset fueling line adapter when desired
     FUEL();
-  }else if(rfInput[1] == "C"){
+  }else if(rfInput[1] == 'C'){
     DONE();
   }
 
-  if(rfInput[2] == "I"){ //close all valves after ignition command is given
+  if(rfInput[2] == 'I'){ //close all valves after ignition command is given
     CLOSE();
   }
 }
