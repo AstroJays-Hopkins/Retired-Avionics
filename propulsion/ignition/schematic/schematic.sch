@@ -244,8 +244,6 @@ Wire Wire Line
 Connection ~ 8750 5550
 Connection ~ 8750 6250
 Wire Wire Line
-	8750 6250 9100 6250
-Wire Wire Line
 	8100 6250 8750 6250
 Connection ~ 8100 5550
 Wire Wire Line
@@ -261,18 +259,17 @@ Connection ~ 9550 5550
 Wire Wire Line
 	9550 5550 9700 5550
 $Comp
-L pspice:DIODE D6
+L Device:D_Schottky D6
 U 1 1 5C6AF6EA
 P 9300 6250
-F 0 "D6" H 9300 5985 50  0000 C CNN
-F 1 "DIODE" H 9300 6076 50  0000 C CNN
+F 0 "D6" H 9300 6350 50  0000 C CNN
+F 1 "DIODE" H 9300 6450 50  0000 C CNN
 F 2 "" H 9300 6250 50  0001 C CNN
 F 3 "~" H 9300 6250 50  0001 C CNN
+F 4 "~" H 9300 6250 50  0001 C CNN "suggested-part"
 	1    9300 6250
-	-1   0    0    1   
+	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	9500 6250 9700 6250
 Wire Wire Line
 	2350 2650 2350 850 
 Wire Wire Line
@@ -347,9 +344,6 @@ Wire Wire Line
 Wire Wire Line
 	4000 5550 4000 5700
 Connection ~ 4000 5550
-Wire Wire Line
-	4000 5550 4350 5550
-Connection ~ 4000 5700
 Connection ~ 8100 6250
 Wire Wire Line
 	9700 6050 9700 6150
@@ -390,14 +384,6 @@ Text HLabel 2550 4900 2    48   Input ~ 0
 GND
 Wire Wire Line
 	4050 4200 3900 4200
-Wire Wire Line
-	4050 5700 4050 4650
-Wire Wire Line
-	4050 4650 3900 4650
-Wire Wire Line
-	4050 5700 4000 5700
-Wire Wire Line
-	4200 4800 3900 4800
 Wire Wire Line
 	4000 6100 4200 6100
 $Sheet
@@ -615,24 +601,13 @@ Connection ~ 10750 3900
 Wire Wire Line
 	10750 3900 10750 3500
 Wire Wire Line
-	9300 2150 9600 2150
-Wire Wire Line
-	9300 2050 9600 2050
-Wire Wire Line
-	4200 4800 4200 6100
+	9450 2150 9600 2150
 Text HLabel 3900 4500 0    48   Input ~ 0
-VOLTAGE_PROBE
+RELAY_CONT_PROBE
 Text HLabel 3900 4350 0    48   Output ~ 0
 ARDUINO_VOLTAGE_DETECT
 Wire Wire Line
 	4050 2650 4050 4200
-Wire Wire Line
-	3900 4500 4350 4500
-Wire Wire Line
-	4350 4500 4350 5550
-Connection ~ 4350 5550
-Wire Wire Line
-	4350 5550 8100 5550
 Wire Wire Line
 	3900 4350 4200 4350
 Wire Wire Line
@@ -669,98 +644,85 @@ Wire Notes Line
 	600  6650 600  600 
 Wire Notes Line
 	4750 600  4750 6650
-Wire Wire Line
-	9300 1950 9300 2050
-Wire Wire Line
-	9300 3150 9300 2150
-Wire Wire Line
-	8900 3150 9300 3150
-Wire Wire Line
-	8250 3700 8300 3700
-Wire Wire Line
-	8300 3150 8300 3700
 Connection ~ 8900 3950
 Wire Wire Line
 	8900 3950 8900 3700
-Connection ~ 8300 3700
-Wire Wire Line
-	8900 3700 8300 3700
 $Comp
 L Motor:Motor_DC M1
 U 1 1 5CBCE40C
-P 8950 2250
-F 0 "M1" H 9108 2246 50  0000 L CNN
-F 1 "Motor_DC" H 9108 2155 50  0000 L CNN
-F 2 "" H 8950 2160 50  0001 C CNN
-F 3 "~" H 8950 2160 50  0001 C CNN
-	1    8950 2250
+P 8400 1850
+F 0 "M1" H 8558 1846 50  0000 L CNN
+F 1 "Motor_DC" H 8558 1755 50  0000 L CNN
+F 2 "" H 8400 1760 50  0001 C CNN
+F 3 "~" H 8400 1760 50  0001 C CNN
+	1    8400 1850
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	8250 1950 8300 1950
-Wire Wire Line
-	8250 1950 8250 3700
 $Comp
 L Device:Battery BT2
 U 1 1 5CAFFAFE
-P 7950 2200
-F 0 "BT2" V 7705 2200 50  0000 C CNN
-F 1 "12V" V 7796 2200 50  0000 C CNN
-F 2 "" V 7950 2260 50  0001 C CNN
-F 3 "~" V 7950 2260 50  0001 C CNN
-	1    7950 2200
-	0    -1   -1   0   
+P 8800 2150
+F 0 "BT2" V 8555 2150 50  0000 C CNN
+F 1 "12V" V 8646 2150 50  0000 C CNN
+F 2 "" V 8800 2210 50  0001 C CNN
+F 3 "~" V 8800 2210 50  0001 C CNN
+	1    8800 2150
+	0    1    -1   0   
 $EndComp
 $Comp
 L Relay:G5LE-1 K3
 U 1 1 5CA3B46E
-P 8600 2950
-F 0 "K3" V 9167 2950 50  0000 C CNN
-F 1 "G5LE-1" V 9076 2950 50  0000 C CNN
-F 2 "Relay_THT:Relay_SPDT_Omron-G5LE-1" H 9050 2900 50  0001 L CNN
-F 3 "http://www.omron.com/ecb/products/pdf/en-g5le.pdf" H 8600 2550 50  0001 C CNN
-	1    8600 2950
-	0    -1   -1   0   
+P 9000 1350
+F 0 "K3" V 9567 1350 50  0000 C CNN
+F 1 "G5LE-1" V 9476 1350 50  0000 C CNN
+F 2 "Relay_THT:Relay_SPDT_Omron-G5LE-1" H 9450 1300 50  0001 L CNN
+F 3 "http://www.omron.com/ecb/products/pdf/en-g5le.pdf" H 9000 950 50  0001 C CNN
+	1    9000 1350
+	0    -1   1    0   
 $EndComp
-$Comp
-L Relay:G5LE-1 K2
-U 1 1 5CA3AEF0
-P 8600 1750
-F 0 "K2" V 9167 1750 50  0000 C CNN
-F 1 "G5LE-1" V 9076 1750 50  0000 C CNN
-F 2 "Relay_THT:Relay_SPDT_Omron-G5LE-1" H 9050 1700 50  0001 L CNN
-F 3 "http://www.omron.com/ecb/products/pdf/en-g5le.pdf" H 8600 1350 50  0001 C CNN
-	1    8600 1750
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	8900 1950 9300 1950
-Wire Wire Line
-	8900 2750 8950 2750
-Wire Wire Line
-	8950 2750 8950 2550
-Wire Wire Line
-	8950 2050 8950 1550
-Wire Wire Line
-	8950 1550 8900 1550
-Wire Wire Line
-	8300 2850 8150 2850
-Wire Wire Line
-	8150 2850 8150 2200
-Wire Wire Line
-	8150 1650 8300 1650
-Connection ~ 8150 2200
-Wire Wire Line
-	8150 2200 8150 1650
-Wire Wire Line
-	7750 1450 7750 2200
-Wire Wire Line
-	7750 2650 8300 2650
-Wire Wire Line
-	7750 1450 8300 1450
-Connection ~ 7750 2200
-Wire Wire Line
-	7750 2200 7750 2650
 Wire Wire Line
 	7150 3850 8950 3850
+Wire Wire Line
+	4000 5550 8100 5550
+Text Label 4000 4500 0    48   ~ 0
+RELAY_CONT_PROBE
+Wire Wire Line
+	3900 4500 4000 4500
+Text Label 850  5850 3    48   ~ 0
+RELAY_CONT_PROBE
+Wire Wire Line
+	850  5850 1200 5850
+Connection ~ 1200 5850
+Wire Wire Line
+	3900 4800 4000 4800
+Wire Wire Line
+	4000 4800 4000 5550
+Wire Wire Line
+	4200 4650 4200 6100
+Wire Wire Line
+	3900 4650 4200 4650
+Wire Wire Line
+	9450 6250 9700 6250
+Wire Wire Line
+	8750 6250 9150 6250
+Text Notes 3600 7150 0    48   ~ 0
+For D6: try https://www.digikey.com/short/p5278r for a list of suitable parts.\nLook high and low.
+Wire Wire Line
+	9450 1150 9300 1150
+Wire Wire Line
+	9450 1150 9450 2150
+Wire Wire Line
+	8600 2150 8400 2150
+Wire Wire Line
+	8400 1650 8700 1650
+Wire Wire Line
+	9300 1550 9300 2150
+Wire Wire Line
+	9000 2150 9300 2150
+Wire Wire Line
+	8700 1150 8200 1150
+Wire Wire Line
+	8200 1150 8200 3700
+Wire Wire Line
+	8200 3700 8900 3700
 $EndSCHEMATC

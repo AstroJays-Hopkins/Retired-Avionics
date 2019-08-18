@@ -39,7 +39,7 @@ $EndComp
 Wire Notes Line
 	6600 3100 6600 3950
 Wire Notes Line
-	3700 3950 3700 3100
+	3500 3950 3500 3100
 $Comp
 L pspice:R R2
 U 1 1 5C72E93C
@@ -172,31 +172,21 @@ Wire Wire Line
 $Comp
 L Comparator:LM393 U3
 U 2 1 5CCBEADA
-P 4050 3600
-F 0 "U3" H 4050 3233 50  0000 C CNN
-F 1 "LM393" H 4050 3324 50  0000 C CNN
-F 2 "" H 4050 3600 50  0001 C CNN
-F 3 "http://www.ti.com/lit/ds/symlink/lm393-n.pdf" H 4050 3600 50  0001 C CNN
-	2    4050 3600
+P 3850 3600
+F 0 "U3" H 3850 3233 50  0000 C CNN
+F 1 "LM393" H 3850 3324 50  0000 C CNN
+F 2 "" H 3850 3600 50  0001 C CNN
+F 3 "http://www.ti.com/lit/ds/symlink/lm393-n.pdf" H 3850 3600 50  0001 C CNN
+	2    3850 3600
 	-1   0    0    1   
 $EndComp
-Wire Wire Line
-	4850 2950 4350 2950
-Wire Wire Line
-	4350 2950 4350 3500
 Connection ~ 4850 2950
 Wire Wire Line
-	4350 3700 4350 4600
-Wire Wire Line
-	3750 3600 3550 3600
-Text HLabel 3550 3600 0    48   Output ~ 0
+	4250 3700 4250 4600
+Text HLabel 3400 3600 0    48   Output ~ 0
 ARDUINO_VOLTAGE_DETECT
-Text HLabel 4350 4600 3    48   Input ~ 0
-VOLTAGE_PROBE
-Wire Notes Line
-	3700 3100 6600 3100
-Wire Notes Line
-	3700 3950 6600 3950
+Text HLabel 4250 4600 3    48   Input ~ 0
+RELAY_CONT_PROBE
 Wire Wire Line
 	4850 3450 4850 3700
 Wire Wire Line
@@ -211,4 +201,60 @@ Wire Wire Line
 Connection ~ 4850 3700
 Wire Wire Line
 	4850 3700 4850 4600
+Wire Wire Line
+	3400 3600 3550 3600
+$Comp
+L pspice:R R?
+U 1 1 5D54AB9F
+P 4550 3200
+F 0 "R?" H 4618 3246 50  0000 L CNN
+F 1 "50k" H 4618 3155 50  0000 L CNN
+F 2 "" H 4550 3200 50  0001 C CNN
+F 3 "~" H 4550 3200 50  0001 C CNN
+	1    4550 3200
+	1    0    0    -1  
+$EndComp
+$Comp
+L pspice:R R?
+U 1 1 5D54AF3C
+P 4250 3200
+F 0 "R?" H 4318 3246 50  0000 L CNN
+F 1 "50k" H 4318 3155 50  0000 L CNN
+F 2 "" H 4250 3200 50  0001 C CNN
+F 3 "~" H 4250 3200 50  0001 C CNN
+	1    4250 3200
+	1    0    0    -1  
+$EndComp
+$Comp
+L pspice:R R?
+U 1 1 5D54B313
+P 4550 3750
+F 0 "R?" H 4618 3796 50  0000 L CNN
+F 1 "500" H 4618 3705 50  0000 L CNN
+F 2 "" H 4550 3750 50  0001 C CNN
+F 3 "~" H 4550 3750 50  0001 C CNN
+	1    4550 3750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4550 3450 4550 3500
+Wire Wire Line
+	4550 3500 4150 3500
+Connection ~ 4550 3500
+Wire Wire Line
+	4250 3450 4250 3700
+Wire Wire Line
+	4250 3700 4150 3700
+Connection ~ 4250 3700
+Wire Wire Line
+	4550 4000 4550 4200
+Wire Wire Line
+	4550 4200 5150 4200
+Connection ~ 5150 4200
+Wire Wire Line
+	4250 2950 4850 2950
+Wire Notes Line
+	3500 3100 6600 3100
+Wire Notes Line
+	3500 3950 6600 3950
 $EndSCHEMATC
