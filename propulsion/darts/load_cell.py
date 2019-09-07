@@ -41,6 +41,12 @@ class Load_Cell:
         self.last_string = ""
         self.serial_port = serport
         self.serial_port.write(b'c')
+        self.last_x_reading = -1
+        self.last_x_string = ""
+        self.last_y_reading = -1
+        self.last_y_string = ""
+        self.last_z_reading = -1
+        self.last_z_string = ""
 
     def select(self):
         GPIO.output(SELECT_GPIO_PIN_TUPLE, self.select_tuple)
@@ -73,18 +79,26 @@ class Load_Cell:
              # print(incoming_char)
              if incoming_char != b'\n':
                 weight_string += incoming_char.decode("utf-8")
+                if weight_string.startsWith('x'):
+                    self.last_x_string = weight_string[1:]
+                elif weight_string.startsWith('y'):
+                    self.last_y_string = weight_string[1:]
+                elif weight_string.startsWith('z'):
+                    self.last_z_string = weight_string[1:]
              else:
                 break  # Read to next newline, which indicates that weight has been completely read.  Leave while loop
           self.last_string = weight_string  ## <-- Mostly for debugging in case we are unable to parse the weight_string into a float.
           # print(weight_string)
           self.last_reading = -float(weight_string)  # convert to floating point number and store
+          self.last_x_reading = -float(self.last_x_string)
+          self.last_y_reading = -float(self.last_y_string)
+          self.last_z_reading = -float(self.last_z_string)
           # Deselect load cell
           self.deselect()
           return self.last_reading
        except Exception as e:
           print("!!! Error reading load cell:")
           print(str(e))
-          print("Returning \"A\"")
           return "A"
 
 
@@ -92,5 +106,7 @@ class Load_Cell:
 def read_load_cells(load_cell_list):
     weights = []
     for load_cell in load_cell_list:
-        weights.append(load_cell.read_weight())
+        #weights.append(load_cell.read_weight())
+        load_cell.read_weight()
+        weights.extend([load_cell.last_x_reading, load_cell.last_y_reading, load_cell.last_z_reading])
     return weights

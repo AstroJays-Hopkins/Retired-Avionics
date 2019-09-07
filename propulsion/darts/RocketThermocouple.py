@@ -13,40 +13,47 @@ import digitalio
 import Adafruit_GPIO.SPI as SPI
 import adafruit_max31855 as MAX31855
 
+
 # Raspberry Pi software SPI configuration.
 CLK = 25
 CS  = 24
 DO  = 18
 # sensor = MAX31855.MAX31855(CLK, CS, DO)
 
+
 # Raspberry Pi hardware SPI configuration.
 #SPI_PORT   = 0
 #SPI_DEVICE = 0
 #sensor = MAX31855.MAX31855(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE))
 
-# returns SPI object to be passed into TC initialization method when creating thermocouple objects
-def begin():
-    spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-    return spi
 
 class Thermocouple(MAX31855.MAX31855):
     def __init__(self, cs_pin, spi):
         super(Thermocouple, self).__init__(spi, digitalio.DigitalInOut(cs_pin))
-        self.last_reading = -1
+        self.last_reading = self.temperature
 
     def readTempC(self):
         try:
             self.last_reading = self.temperature  # MAX31855.MAX31855.readTempC(self)
             return self.last_reading
         except Exception as e:
-            print("!!! Error whilst reading TC:")
-            print(str(e))
-            print("Returning \"E\".")   ## Indicate error for logfiles
-            return "E"   ## FIXME: What if the temperature was freezing?  Then -1 could be a valid temperature as well as an indicator of an error...
+            print("!!! Error while reading TC: " + str(e))
+            ## FIXME: What if the temperature was freezing?  Then -1 
+            # could be a valid temperature as well as an indicator of 
+            # an error...
+            return "E"   
+
+def begin():
+    """ returns SPI object to be passed into TC initialization method 
+        when creating thermocouple objects
+    """
+    spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+    return spi
 
 
-# Define a function to convert celsius to fahrenheit.
 def c_to_f(c):
+    """ convert celsius to fahrenheit.
+    """
     return c * 9.0 / 5.0 + 32.0
 
 
