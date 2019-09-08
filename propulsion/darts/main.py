@@ -176,7 +176,7 @@ def collectData():
         # Adding ematch state information
         data.append(getEmatchState())
         
-        # Return list of data
+        # Return list of datals
         return data
         
     except IOError as e:
