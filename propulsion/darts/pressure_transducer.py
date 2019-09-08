@@ -30,8 +30,12 @@ class PressureTransducer:
 
 def readPressureTransducers(PTArray):
     data = []
-    for sensor in PTArray:
-        data.append(sensor.readPressure())
+    # for sensor in PTArray:
+    for sensor in range(4):
+        # data.append(sensor.readPressure())
+        data.append("E [PT]")
+        
+        
         # data.append(sensor.chan.voltage)
         # data.append(sensor.chan.value)
     return data 
