@@ -97,16 +97,20 @@ class Load_Cell:
           self.deselect()
           return self.last_reading
        except Exception as e:
-          print("!!! Error reading load cell:")
           print(str(e))
-          return "A"
+          print("!!! Error reading load cell:")
+          return "E"
 
 
 # Iterates through load cells objects, reads load cells, and returns array of measured weights
 def read_load_cells(load_cell_list):
     weights = []
-    for load_cell in load_cell_list:
-        #weights.append(load_cell.read_weight())
-        load_cell.read_weight()
-        weights.extend([load_cell.last_x_reading, load_cell.last_y_reading, load_cell.last_z_reading])
+    # for load_cell in load_cell_list:
+    for load_cell in range(3):
+        # weights.append(load_cell.read_weight())
+        weights.append("E [LC]") 
+        
+        
+        # load_cell.read_weight()
+        # weights.extend([load_cell.last_x_reading, load_cell.last_y_reading, load_cell.last_z_reading])
     return weights

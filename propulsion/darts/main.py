@@ -134,7 +134,6 @@ def collectData():
         
         # Adding thermocouple data 
         data.extend(tc.readThermocouples(TCs))
-        print("asdf" + str(tc.readThermocouples(TCs)))
         
         # Temperature Safety Check! Make sure tank isn't going to explode
         for thermocouple in TCs:
@@ -169,7 +168,7 @@ def collectData():
         
         # Adding disconnect state information
         # data.append(getDisconnectState())
-        data.extend([0, 0])   # pads out spot that would have been occupied with disconnect/reset states
+        data.extend(["E [DIS]", "E [RES]"])   # pads out spot that would have been occupied with disconnect/reset states
         
         # Adding ball valve state information
         data.append(getBallValveState())
@@ -180,10 +179,10 @@ def collectData():
         # Return list of data
         return data
         
-    except Exception as e:
+    except IOError as e:
         print("!!! Error in colletData:")
         print(str(e))
-        return None
+        return data
 
 
 ########################################################################
@@ -209,11 +208,20 @@ def Vent():
      
 
 def getFuelSolState():
-    return GPIO.input(FUEL_SOLENOID_DETECT_PIN)
-
+    try: 
+        return GPIO.input(FUEL_SOLENOID_DETECT_PIN)
+    except Exception as e:
+        print(str(e))
+        print("Error with getFuelSolState")
+        return "E [FSS]"
 
 def getVentState():
-    return GPIO.input(VENT_VALVE_DETECT_PIN)
+    try: 
+        return GPIO.input(VENT_VALVE_DETECT_PIN)
+    except Exception as e:
+        print(str(e))
+        print("Error with getVentState")
+        return "E [VS]"
 
 
 # def getDisconnectState():
@@ -221,17 +229,32 @@ def getVentState():
 
 
 def getBallValveState():
-    return GPIO.input(MBVALVE_DETECT_PIN)
+    try: 
+        return GPIO.input(MBVALVE_DETECT_PIN)
+    except Exception as e:
+        print(str(e))
+        print("Error with getBallValveState")
+        return "E [BVS]"
 
 
 def getEmatchState():
-    return GPIO.input(EMATCH_DETECT_PIN)
+    try: 
+        return GPIO.input(EMATCH_DETECT_PIN)
+    except Exception as e:
+        print(str(e))
+        print("Error with getEmatchState")
+        return "E [EMS]"
     
 
 def getBallValveMovingState():
     """ Checks pin from Arduino indicating if the ball valve is being actuated.
     """
-    return -1 ## GPIO.input(MBVALVE_ACTUATING_DETECT_PIN)
+    try: 
+        return GPIO.input(MBVALVE_ACTUATING_DETECT_PIN)
+    except Exception as e:
+        print(str(e))
+        print("Error with getMovingBallValveMovingState")
+        return "E [BVMS]"
     
 
 ########################################################################
@@ -242,8 +265,7 @@ def getBallValveMovingState():
 def writedata(data_writer, args):
     """ Write data to file (currently DATA1.csv)
     """
-    packet = []
-    packet.append(datetime.now())
+    packet = [datetime.now()]
     packet.extend(args)
     data_writer.writerow(packet)
 
@@ -256,7 +278,7 @@ def main(DATA_READ_INTERVAL=0.01):
         data_writer = writer(log)
 
         #Header row so you know what you're looking at (change as necessary)
-        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','FuelValve','VentValve','Disconnect','Reset','BallValve','Ignition'])
+        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','FuelValve','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
         
         # Initialize sensors
         try:
@@ -276,12 +298,14 @@ def main(DATA_READ_INTERVAL=0.01):
         while True:
             #collect all data here and assign to variables
             #slam all that shite into the writedata function (or append to a list each time a sensor is read)
+            #import pdb; pdb.set_trace()
             data = collectData()
             if data is not None:
                 try:
-                    writedata(data_writer, data.extend(getBallValveMovingState()))
+                    data.append(getBallValveMovingState())
+                    writedata(data_writer, data)
                     sendData(data)
-                    print(data.extend(getBallValveMovingState()))
+                    print(data)
                 except Exception as e:
                     print(str(e))
                     print("!!! Error in main DART loop whilst recording or transmitting data:")
