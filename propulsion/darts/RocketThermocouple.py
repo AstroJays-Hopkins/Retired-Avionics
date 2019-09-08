@@ -60,6 +60,8 @@ def c_to_f(c):
 # Define a function that returns the list of thermocouple measurements 
 def readThermocouples(rocketThermocouples):
     data = []
-    for sensor in rocketThermocouples:
-        data.append(sensor.readTempC())
+    # for sensor in rocketThermocouples:
+    for sensor in range(6):
+        # data.append(sensor.readTempC())
+        data.append("E [TC]")
     return data 
