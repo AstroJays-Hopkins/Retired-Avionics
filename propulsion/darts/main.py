@@ -100,12 +100,22 @@ def init():
 
     spi = tc.begin() # Makes Serial Periphrial Interface object for communication with TC
     # Initialize thermocouples
+    print(TC_CS_PINS)
     for cs_pin in TC_CS_PINS:
-        TCs.append(tc.Thermocouple(cs_pin, spi))
+        try:
+            TCs.append(tc.Thermocouple(cs_pin, spi))
+        except Exception as e:
+            print(e)
+            print("TC Error" + " " + str(cs_pin))
 
     # Initialize PTs
+    print(PT_CHANNELS)
     for pt_chan in PT_CHANNELS:
-        PTs.append(pt.PressureTransducer(pt_chan))
+        try: 
+            PTs.append(pt.PressureTransducer(pt_chan))
+        except Exception as e:
+            print(e)
+            print("TC Error" + " " + str(pt_chan))
 
     # Configure GPIO pin for telling the ignition computer to close the motorized ball valve in an emergency:
     GPIO.setup(EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT) # Makes ball-valve pin an output pin
@@ -168,7 +178,7 @@ def collectData():
         
         # Adding disconnect state information
         # data.append(getDisconnectState())
-        data.extend(["E [DIS]", "E [RES]"])   # pads out spot that would have been occupied with disconnect/reset states
+        data.extend(["E[DIS]", "E[RES]"])   # pads out spot that would have been occupied with disconnect/reset states
         
         # Adding ball valve state information
         data.append(getBallValveState())
@@ -213,7 +223,7 @@ def getFuelSolState():
     except Exception as e:
         print(str(e))
         print("Error with getFuelSolState")
-        return "E [FSS]"
+        return "E[FSS]"
 
 def getVentState():
     try: 
@@ -221,7 +231,7 @@ def getVentState():
     except Exception as e:
         print(str(e))
         print("Error with getVentState")
-        return "E [VS]"
+        return "E[VS]"
 
 
 # def getDisconnectState():
@@ -234,7 +244,7 @@ def getBallValveState():
     except Exception as e:
         print(str(e))
         print("Error with getBallValveState")
-        return "E [BVS]"
+        return "E[BVS]"
 
 
 def getEmatchState():
@@ -243,18 +253,19 @@ def getEmatchState():
     except Exception as e:
         print(str(e))
         print("Error with getEmatchState")
-        return "E [EMS]"
+        return "E[EMS]"
     
 
 def getBallValveMovingState():
     """ Checks pin from Arduino indicating if the ball valve is being actuated.
     """
     try: 
-        return GPIO.input(MBVALVE_ACTUATING_DETECT_PIN)
+        ## return GPIO.input(MBVALVE_ACTUATING_DETECT_PIN)
+        return 0
     except Exception as e:
         print(str(e))
         print("Error with getMovingBallValveMovingState")
-        return "E [BVMS]"
+        return "E[BVMS]"
     
 
 ########################################################################
@@ -273,8 +284,8 @@ def writedata(data_writer, args):
 def main(DATA_READ_INTERVAL=0.01):
     
     ## There used to be an ' import csv ' statement here and ' writer(log) ' was ' csv.writer(log) '
-    filename = "DATA2.csv"
-    with open(filename,'a',newline='') as log:
+    filename = "data/DATA.csv"
+    with open(filename,'w',newline='') as log:
         data_writer = writer(log)
 
         #Header row so you know what you're looking at (change as necessary)
@@ -285,7 +296,7 @@ def main(DATA_READ_INTERVAL=0.01):
             init()
         except Exception as e:
             print(e)
-            print("Error in inittialization")
+            print("Error in initialization")
         
         # Print out a reminder (maybe remove this)
         print("!!!!!!!!!!!!!!!!DO BE AWARE that there is an extra value"

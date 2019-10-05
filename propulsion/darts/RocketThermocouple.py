@@ -54,14 +54,17 @@ def begin():
 def c_to_f(c):
     """ convert celsius to fahrenheit.
     """
-    return c * 9.0 / 5.0 + 32.0
+    return (c * 9.0 / 5.0 + 32.0)
 
 
 # Define a function that returns the list of thermocouple measurements 
 def readThermocouples(rocketThermocouples):
     data = []
     # for sensor in rocketThermocouples:
-    for sensor in range(6):
-        # data.append(sensor.readTempC())
-        data.append("E [TC]")
+    for i in range(6):
+        try: 
+            data.append(rocketThermocouples[i].readTempC())
+        except Exception as e:
+            print(str(e) + " " + str(i))
+            data.append("E[TC]")
     return data 
