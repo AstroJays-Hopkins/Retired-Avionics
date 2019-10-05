@@ -8,7 +8,7 @@ from adafruit_ads1x15.ads1115 import P0,P1,P2,P3
 import threading
 import time
 import board
-import load_cell as lc
+from load_cell import LoadCellReader
 import RocketThermocouple as tc
 import pressure_transducer as pt
 from SendToFlask import sendData
@@ -75,8 +75,7 @@ global Ser
 # Where load cell objects are stored
 # To access the last reading of an individual load cell i,
 # use LOAD_CELLS[i].last_reading
-LOAD_CELLS = []  
-
+LC_Reader = None
 
 # Place to put TC objects
 TCs = []
@@ -87,18 +86,10 @@ PTs = []
 
 
 def init():
-    """ Creates all sensor objects and configures all GPIO pins
+    global LC_Reader
+    LC_Reader = LoadCellReader(["/dev/usbLC0", "/dev/usbLC1", "/dev/usbLC2"])
     
-        TODO Make external configuration file for number and pins for all sensors
-    """
-    
-    # Initialize load cell serial and GPIO, then instantiate load cell objects
-    Ser = lc.begin() # Returns a serial port
-    for select_tuple in LC_SEL_TUPLES:  
-        if select_tuple:
-            LOAD_CELLS.append(lc.Load_Cell(select_tuple, Ser))
-
-    spi = tc.begin() # Makes Serial Periphrial Interface object for communication with TC
+    spi = tc.begin();
     # Initialize thermocouples
     print(TC_CS_PINS)
     for cs_pin in TC_CS_PINS:
@@ -161,16 +152,14 @@ def collectData():
                 emergency_shutdown()
                 Is_Critical = True
                 print('EMERGENCY SHUTDOWN: Critical Pressure detected')
-        
-        #Adding load cell data 
-        data.extend(lc.read_load_cells(LOAD_CELLS))
-        
         # [*TC1 (Top), *TC2 (Bottom), TC3, TC4, TC5, TC6, *PT1 (Top), 
         # *PT2 (Bottom), PT3, *LC1 (NOX mass), LC2 (Thrust), LC3, 
         # *Sol1 (Fueling), *Sol2 (Venting), *Sol3 (Disconnect), 
         # *Sol4 (Reset), *Ballvalve, *Ignition]
         
+        data = data + LC_Reader.read_load_cells()
         # Adding whether or not solenoid is fueling
+   #[*TC1 (Top), *TC2 (Bottom), TC3, TC4, TC5, TC6, *PT1 (Top), *PT2 (Bottom), PT3, *LC1 (NOX mass), LC2 (Thrust), LC3, *Sol1 (Fueling), *Sol2 (Venting), *Sol3 (Disconnect), *Sol4 (Reset), *Ballvalve, *Ignition]
         data.append(getFuelSolState())
         
         # Adding state of vent valve

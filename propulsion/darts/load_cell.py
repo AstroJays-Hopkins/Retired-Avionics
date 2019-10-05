@@ -1,116 +1,99 @@
 import time
-import serial  # PySerial documentation: https://pythonhosted.org/pyserial/index.html
-try:
-   import RPi.GPIO as GPIO  # RPi.GPIO documentation: https://sourceforge.net/p/raspberry-gpio-python/wiki/
-except:
-  print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
+from serial import Serial, SerialException  # PySerial documentation: https://pythonhosted.org/pyserial/index.html
 
-SELECT_GPIO_PIN_TUPLE = (23,24)  ## TEMPORARY VALUES.  CHANGE AS NEEDED.
-DESELECT_TUPLE = (1,1)  ## Corresponds to C3 pins on the MUX, which are grounded and will read nothing.
-
-## Set pin numbering scheme to correspond to numbers printed on board
-GPIO.setmode(GPIO.BCM)
-
-## Initialize load cell GPIO and serial
-## Is putting it in a separate function necessary?
-def begin():
-    ## Set select pins to output
-    GPIO.setup(SELECT_GPIO_PIN_TUPLE, GPIO.OUT)
-    # Initialise serial
-    try:                                                        # 1 s timeout
-        ser = serial.Serial(port='/dev/ttyS0', baudrate=115200, timeout=1)
-        return ser
-    except (OSError, serial.SerialException):
-        print ("init_load_cell_serial_port(): Serial " + str(serialPort) + " did not connect")
-        return -1
-
-def end():
-    GPIO.cleanup()
 
 # There is no Adafruit library for load cells, so there is no preexisting
 # load cell class to subclass.  I've still made my own below to keep
 # everything organized.
-class Load_Cell:
-    # Just another access point for the serial port used to read load cell data
-    serial_port = False
+class LoadCell:
+    def __init__(self, serport, timeout=0.1):
+        '''
+        Initialize serial connection to the Openscale using the specified
+        parameters.
 
-    # select_tuple is a tuple of bits written to A and B of the MUX to select the Tx/Rx lines of the the load cell
-    def __init__(self, select_tuple, serport):
-        self.select_tuple = select_tuple  # GPIO pin to raise in order to read load cell
-        self.last_reading = -1
-        self.last_string = ""
-        self.serial_port = serport
-        self.serial_port.write(b'c')
-        self.last_x_reading = -1
-        self.last_x_string = ""
-        self.last_y_reading = -1
-        self.last_y_string = ""
-        self.last_z_reading = -1
-        self.last_z_string = ""
+        :param serport: String path to the serial device to use to communicate
+                        with the openscale
+        :param timeout: amount of time to wait for new data while reading. Note
+                        that if the program is single threaded this will cause
+                        the entire program to hang for that amount of time if
+                        there is no new data
+        '''
+        self.last_read = None
+        try:
+            self.loadcell = Serial(serport, baudrate=115200, timeout=timeout)
+            self.read_and_verify()
+        except(OSError, SerialException):
+            print ("Loadcell at {} did not connect".format{serport))
 
-    def select(self):
-        GPIO.output(SELECT_GPIO_PIN_TUPLE, self.select_tuple)
+    # empty buffer until good data is present
+    def read_and_verify(self):
+        '''
+        Read a line off the serial port and verify it's weight data. If it's nto
+        weight data, read until weight data is returned.
 
-    def deselect(self):
-        GPIO.output(SELECT_GPIO_PIN_TUPLE, DESELECT_TUPLE)
+        :return: floating point number of the current measured weight on scale
+        '''
+        line  = ''
+        # discard all data that doesn't validate
+        while len(line.split(',')) != 4:
+            line = self.loadcell.readline().decode('utf-8')
+        return float(line.split(',')[1])
 
-    # Following method adapted from A. Cornelio's readWeight1() in
-    # "Avionics/Cold Flow/Wet_Dress/Wet_Dress.ino"
+    def _clear_buffer(self):
+        '''
+        Clears the serial read buffer
+        '''
+        while self.loadcell.in_waiting != 0:
+            self.loadcell.read()
+
     def read_weight(self):
-       try:
-          # Select load cell
-          self.select()
-          # Empty serial buffer
-          while (self.serial_port.in_waiting != 0):
-             self.serial_port.read()
-          # Trigger read by sending one arbitrary character
-          self.serial_port.write(b'c')
-          # Read to first comma (",") in response;
-          # discard characters including comma (timestamp; not needed)
-          start_listen_time = time.time()
-          # while (self.serial_port.read() != ","):  ## do nothing in loop; reading done as part of condition checking
-          #     pass
-          ##  or ((time.time() - start_listen_time) < 1)
-          #print(self.serial_port.read())
-          weight_string = ""
-          # Read weight and concatenate to string
-          while True:
-             incoming_char = self.serial_port.read()
-             # print(incoming_char)
-             if incoming_char != b'\n':
-                weight_string += incoming_char.decode("utf-8")
-                if weight_string.startsWith('x'):
-                    self.last_x_string = weight_string[1:]
-                elif weight_string.startsWith('y'):
-                    self.last_y_string = weight_string[1:]
-                elif weight_string.startsWith('z'):
-                    self.last_z_string = weight_string[1:]
-             else:
-                break  # Read to next newline, which indicates that weight has been completely read.  Leave while loop
-          self.last_string = weight_string  ## <-- Mostly for debugging in case we are unable to parse the weight_string into a float.
-          # print(weight_string)
-          self.last_reading = -float(weight_string)  # convert to floating point number and store
-          self.last_x_reading = -float(self.last_x_string)
-          self.last_y_reading = -float(self.last_y_string)
-          self.last_z_reading = -float(self.last_z_string)
-          # Deselect load cell
-          self.deselect()
-          return self.last_reading
-       except Exception as e:
-          print(str(e))
-          print("!!! Error reading load cell:")
-          return "E"
+        '''
+        Read the current weight trnasmitted over serial, or return the last
+        weight read if there is no new data. Note that this only works when the
+        read loop is faster than the serial transmit rate, otherwise the buffers
+        will fill and data will get out of sync.
 
+        :return: Current weight on scale if the openscale transmitted new data,
+                 otherwise, the last transmitted weight.
+        '''
+        # if the loadloadcell serial object doesn't exist, immediately return an
+        # error. This means that initialization failed probably because the LC
+        # wasn't connected
+        if not self.loadcell:
+            return "E[LC]"
+        # only collect data if there's something new on the port. No sense
+        # blocking until we get a read if we haven't been sent anything
+        # TODO: async function?
+        if self.loadcell.in_waiting != 0:
+            try:
+                self._clear_buffer()
+                self.last_read = self.read_and_verify()
+            except (OSError, SerialError):
+                print("Failed to read loadcell at {}".format(self.loadcell.port))
+                self.last_read = "E[LC]"
+        return self.last_read
 
-# Iterates through load cells objects, reads load cells, and returns array of measured weights
-def read_load_cells(load_cell_list):
-    weights = []
-    # for load_cell in load_cell_list:
-    for load_cell in range(3):
-        # weights.append(load_cell.read_weight())
-        weights.append("E [LC]") 
-        
-        
-        # load_cell.read_weight()
-        # weights.extend([load_cell.last_x_reading, load_cell.last_y_reading, load_cell.last_z_reading])
-    return weights
+class LoadCellReader:
+    def __init__(self, serports, timeout=1):
+        '''
+        Initialize a new Load_Cell_Reader object to read the load cells
+        connected via serial interfaces.
+
+        :param serports: list of serial port devices to connect to
+        :param timeout: amount of tiem to wait for new data when reading the
+                        serial port
+        '''
+        self.loadcells = []
+        for port in serports:
+            self.loadcells.append(LoadCell(port, timeout))
+
+    def read_load_cells(self):
+        '''
+        Read all load cells specified when creating this reader object
+
+        :return: list of loadcell reading in order they were initially specified
+        '''
+        weights = []
+        for lc in self.cells:
+            weights.append(lc.read_weight())
+        return weights
