@@ -3,11 +3,14 @@ import busio
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
-# Create the I2C bus
-i2c = busio.I2C(board.SCL, board.SDA)
+try:
+    # Create the I2C bus
+    i2c = busio.I2C(board.SCL, board.SDA)
 
-# Create the ADC object using the I2C bus
-Global_ADS = ADS.ADS1115(i2c)
+    # Create the ADC object using the I2C bus
+    Global_ADS = ADS.ADS1115(i2c)
+except Exception as e:
+    print(e)
 
 # Global_ADS.gain = 2
 
@@ -28,14 +31,15 @@ class PressureTransducer:
             return "E"
 
 
-def readPressureTransducers(PTArray):
+def readPressureTransducers(PTarray):
     data = []
     # for sensor in PTArray:
-    for sensor in range(4):
-        # data.append(sensor.readPressure())
-        data.append("E [PT]")
-        
-        
+    for i in range(4):
+        try:
+            data.append(PTarray[i].readPressure())
+        except Exception as e:
+            data.append("E[PT]")
+            print(str(e))
         # data.append(sensor.chan.voltage)
         # data.append(sensor.chan.value)
     return data 
