@@ -27,6 +27,8 @@ class LoadCell:
             self.loadcell = Serial(serport, baudrate=115200, timeout=timeout)
             self.read_and_verify()
         except(OSError, SerialException):
+            # kludge, please handle exceptions properly
+            self.loadcell = None
             print ("Loadcell at {} did not connect".format{serport))
 
     # empty buffer until good data is present
@@ -102,6 +104,6 @@ class LoadCellReader:
         :return: list of loadcell reading in order they were initially specified
         '''
         weights = []
-        for lc in self.cells:
+        for lc in self.loadcells:
             weights.append(lc.read_weight())
         return weights
