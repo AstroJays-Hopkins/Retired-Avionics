@@ -6,7 +6,7 @@ from serial import Serial, SerialException  # PySerial documentation: https://py
 # load cell class to subclass.  I've still made my own below to keep
 # everything organized.
 class LoadCell:
-    def __init__(self, serport, timeout=0.1):
+    def __init__(self, serport, timeout):
         '''
         Initialize serial connection to the Openscale using the specified
         parameters.
@@ -74,7 +74,7 @@ class LoadCell:
         return self.last_read
 
 class LoadCellReader:
-    def __init__(self, serports, timeout=1):
+    def __init__(self, serports, timeout=0.1):
         '''
         Initialize a new Load_Cell_Reader object to read the load cells
         connected via serial interfaces.
