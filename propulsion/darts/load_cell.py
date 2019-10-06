@@ -6,6 +6,10 @@ from serial import Serial, SerialException  # PySerial documentation: https://py
 # load cell class to subclass.  I've still made my own below to keep
 # everything organized.
 class LoadCell:
+    '''
+    This class to describes a single loadcell. If batch reading is required,
+    the `LoadCellReader` class should probably be used instead.
+    '''
     def __init__(self, serport, timeout):
         '''
         Initialize serial connection to the Openscale using the specified
@@ -48,7 +52,7 @@ class LoadCell:
 
     def read_weight(self):
         '''
-        Read the current weight trnasmitted over serial, or return the last
+        Read the current weight transmitted over serial, or return the last
         weight read if there is no new data. Note that this only works when the
         read loop is faster than the serial transmit rate, otherwise the buffers
         will fill and data will get out of sync.
@@ -74,6 +78,10 @@ class LoadCell:
         return self.last_read
 
 class LoadCellReader:
+    '''
+    This class reads an arbitrary number of serial loadcells based on a
+    preconfigured lsit of serial ports to monitor.
+    '''
     def __init__(self, serports, timeout=0.1):
         '''
         Initialize a new Load_Cell_Reader object to read the load cells
