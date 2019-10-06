@@ -35,13 +35,17 @@ int Active_Relay_Pin = 0;
 // Signal pins to relays.
 // Program assumes that one relay spins the motor forwad and the other relay
 // is connected to the motor backwards to spin it in reverse.
-const int MOTOR_FORWARD_RELAY_PIN = 5;
-const int MOTOR_REVERSE_RELAY_PIN = 6;
+const int MOTOR_FORWARD_RELAY_PIN = 4;
+const int MOTOR_REVERSE_RELAY_PIN = 5;
 // Forward opens; reverse closes
+//Signal pins to relays for solenoid valves
+const int fuelRelay = 6;
+const int ventRelay = 7;
+
 // Signal pins to Pi
-const int VALVE_MOVING_INDICATOR_PIN = 7;
-const int VALVE_STATE_INDICATOR_PIN = 8;
-const int ematch_pin = 9;
+const int VALVE_MOVING_INDICATOR_PIN = 8;
+const int VALVE_STATE_INDICATOR_PIN = 9;
+const int ematch_pin = 3;
 // States for the above pins
 bool Valve_moving = true;  // If HIGH -> valve is moving; LOW -> not moving
 bool Valve_state = false;   // HIGH -> open; LOW -> closed 
@@ -49,12 +53,8 @@ bool Valve_state = false;   // HIGH -> open; LOW -> closed
 bool RECVD_IG_CMD = 0;
 const int burn_duration = 6500; // The duration for the ignition burn
 long burn_time = 0;
+int8_t commands[3];
 
-//Signal pins to relays for solenoid valves
-const int fuelRelay = 4;
-const int ventRelay = 5;
-const int dcRelay = 6;
-const int resetRelay = 7;
 
 void turn_motor_off () {
   digitalWrite(Active_Relay_Pin, LOW);
@@ -73,6 +73,7 @@ void turn_motor_on_forward () {
   // Set valve moving state and pin
   Valve_moving = HIGH;
   digitalWrite(VALVE_MOVING_INDICATOR_PIN, HIGH);
+  Serial.println("BV FORWARD");
 }  
 
 void turn_motor_on_reverse () {
@@ -85,6 +86,7 @@ void turn_motor_on_reverse () {
   // Set valve state and pin
   Valve_moving = HIGH;
   digitalWrite(VALVE_MOVING_INDICATOR_PIN, HIGH);
+  Serial.println("BV BACKWARD");
 }
 
 /* *** MOTOR HALL EFFECT ENCODER *** */
@@ -109,7 +111,7 @@ void increment_channel_b () {
   check_rotation_and_stop_if_needed();
 }
 
-bool ematch_continuity() { 
+bool ematch_continuity() { // Check if ematch is burnt through.
   return digitalRead(ematch_pin); 
 }
 
@@ -131,24 +133,24 @@ void check_rotation_and_stop_if_needed () {
   }
 }
 
-void open_vent() { //open venting solenoid
+void open_vent() { //open venting solenoid. NOTE: venting valve is opened when low, reverse of others.
   digitalWrite(ventRelay,LOW);
-  Serial.println("VENTING");
+  Serial.println("VENT OPEN");
 }
 
 void close_vent() { // close venting solenoid
   digitalWrite(ventRelay,HIGH);
-  Serial.println("NOT VENTING");
+  Serial.println("VENT CLOSE");
 }
 
 void open_fuel() { //open fueling valve
   digitalWrite(fuelRelay,HIGH);
-  Serial.println("FUELING VALVE OPEN");
+  Serial.println("FUEL OPEN");
 }
 
 void close_fuel() { //close fueling valve
   digitalWrite(fuelRelay,LOW);
-  Serial.println("FUELING VALVE CLOSED");
+  Serial.println("FUEL CLOSE");
 }
 
 void close_all() { //close all valves
@@ -178,13 +180,11 @@ void setup() {
   
   //set relay pins to output voltage
   pinMode(ventRelay,OUTPUT);
-  // pinMode(dcRelay,OUTPUT);
-  pinMode(resetRelay,OUTPUT);
+  pinMode(fuelRelay, OUTPUT);
 
   //set default relay states to LOW (default)
-  digitalWrite(ventRelay,LOW);
-  digitalWrite(dcRelay,LOW);
-  digitalWrite(resetRelay,LOW);
+  digitalWrite(ventRelay, HIGH);
+  digitalWrite(fuelRelay, LOW);
   
   //setup timer2 interrupt for ignition procedure. 1kHz -> 64 prescalar + 249 compare interrupt
   // The control of the rocket will be disabled during ignition if delay() is used, which is blocking.
@@ -212,54 +212,71 @@ ISR(TIMER2_COMPA_vect){
 
 void loop() {
   // Put code in to activate relays upon request.
-  int8_t command[3];
   int packetSize = LoRa.parsePacket();
   if (packetSize) {
-    int8_t i = 0;
+    int i = 0;
     while (LoRa.available()) { //get full RF command
-      command[i] = LoRa.read();
+      byte command = LoRa.read();
+      switch (command){
+        case 48:
+          commands[i] = 0;
+          break;
+        case 49:
+          commands[i] = 1;
+          break;
+        case 50:
+          commands[i] = 2;
+          break;
+        case 51:
+          commands[i] = 3;
+          break;
+      }
       i = (i+1) % 3; // just to ensure that the index is always less than 3. 
       //In case under mysterious reasons, 1 packet contains multiple data.
     }
     // Serial.println(command);
     for(int i=0; i<3; i++){ //DEBUG
-      Serial.print(command[i]);
+      Serial.print(commands[i]);
     }
+    Serial.println("");
   }
   
-  int8_t BV_Command = command[2]; //check ball valve desired state
+  int8_t BV_Command = commands[0]; //check ball valve desired state
   switch (BV_Command) { //set desired ball valve state
   case 1: 
-    Serial.println("FORWARD");
     turn_motor_on_forward();
     break;
   case 0:
-    Serial.println("REVERSE");
     turn_motor_on_reverse();
     break;
-  case 127: 
+  case 3: 
     Serial.println("RECVD IGNITION CMD...");
     turn_motor_on_forward();
     RECVD_IG_CMD = 1;
     break;
-  case -1:
+  case 2:
     Serial.println("HOLDING");
     break;
   }
-  
-  int8_t Vent_Command = command[0]; //Check vent valve desired state
-  switch (Vent_Command) { //set desired vent valve state
-    case 1:
-      open_vent();
-    case 0:
-      close_vent();
-  }
-  
-  int8_t Fuel_Command = command[1]; //Check fuel valve desired state
+
+  int8_t Fuel_Command = commands[1]; //Check fuel valve desired state
   switch (Fuel_Command) { //set desired fuel valve
     case 1:
       open_fuel();
+      break;
     case 0:
       close_fuel();
+      break;
   }
+  
+  int8_t Vent_Command = commands[2]; //Check vent valve desired state
+  switch (Vent_Command) { //set desired vent valve state
+    case 1:
+      open_vent();
+      break;
+    case 0:
+      close_vent();
+      break;
+  }
+  Serial.println("------------------------------");
 }
