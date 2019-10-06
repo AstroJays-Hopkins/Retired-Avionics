@@ -4,10 +4,9 @@
 
 from datetime import datetime
 from csv import writer
-from adafruit_ads1x15.ads1115 import P0,P1,P2,P3
 import threading
 import time
-import board
+from constants import Const
 from load_cell import LoadCellReader
 import RocketThermocouple as tc
 import pressure_transducer as pt
@@ -25,35 +24,6 @@ except:
 
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
 ## --> No undefined variables  :)
-
-
-### BLASTED PINS FOR SENSORS AND DETECTION WHATNOT ###
-
-
-# Setting pin numbers (BCM Number) for various sensors
-EMERG_MBVALVE_SHUTOFF_PIN = 4 # If things get too hot, this pin goes HIGH to tell arduino to shut off ball-valve
-MBVALVE_DETECT_PIN = 12 # Moving ball valve
-FUEL_SOLENOID_DETECT_PIN = 16 # Fueling solenoid
-VENT_VALVE_DETECT_PIN = 25 # vent valve
-EMATCH_DETECT_PIN = 13 # electronic match
-# DISCONNECT_DETECT_PIN = 16 # detect whether or not fuel hose is still connected (Needs work)
-
-
-# Setting inputs from arduino/raspberryPi
-PT_CHANNELS = [P0,P1,P2] # List of pressure transducer pins
-TC_CS_PINS = [board.D17, board.D27, board.D22, board.D5, 
-    board.D6, board.D26] # List of thermocouple pins
-LC_SEL_TUPLES = [(0, 0), (0, 1), (1, 0)] # Load cells
-# LC_SEL_TUPLES = ((0, 0), (0, 1), (1, 0)) # Load cells # should this be a list of tuples?
-# TC_CS_PINS = [17,27,22,5,6,13]
-#TC_CS_PINS = [board.D17,board.D27]
-#LC_SEL_TUPLES = ((0, 0), None)
-
-
-# Set critical values
-CRIT_T = 309.5 # Critical Temperature in Kelvin
-# FIXME: Probably VERY WRONG 
-CRIT_P = 7240.0 # Critical pressure in ??????????
 
 
 # Hoopefully we don't start off in critical condition                                                       
@@ -92,8 +62,8 @@ def init():
     
     spi = tc.begin();
     # Initialize thermocouples
-    print(TC_CS_PINS)
-    for cs_pin in TC_CS_PINS:
+    print(Const.TC_CS_PINS)
+    for cs_pin in Const.TC_CS_PINS:
         try:
             TCs.append(tc.Thermocouple(cs_pin, spi))
         except Exception as e:
@@ -101,8 +71,8 @@ def init():
             print("TC Error" + " " + str(cs_pin))
 
     # Initialize PTs
-    print(PT_CHANNELS)
-    for pt_chan in PT_CHANNELS:
+    print(Const.PT_CHANNELS)
+    for pt_chan in Const.PT_CHANNELS:
         try: 
             PTs.append(pt.PressureTransducer(pt_chan))
         except Exception as e:
@@ -110,14 +80,14 @@ def init():
             print("TC Error" + " " + str(pt_chan))
 
     # Configure GPIO pin for telling the ignition computer to close the motorized ball valve in an emergency:
-    GPIO.setup(EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT) # Makes ball-valve pin an output pin
-    GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, False) # Set pin outpuit to be false
-    GPIO.setup(MBVALVE_DETECT_PIN, GPIO.IN) # Read position of ball valve (open or close)
+    GPIO.setup(Const.EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT) # Makes ball-valve pin an output pin
+    GPIO.output(Const.EMERG_MBVALVE_SHUTOFF_PIN, False) # Set pin outpuit to be false
+    GPIO.setup(Const.MBVALVE_DETECT_PIN, GPIO.IN) # Read position of ball valve (open or close)
     
     # Configure vent GPIO pins
-    GPIO.setup(VENT_VALVE_DETECT_PIN, GPIO.IN) # Read position of vent valve (open or close)
-    GPIO.setup(FUEL_SOLENOID_DETECT_PIN, GPIO.IN) # Read whether opr not we are fueling (open or close)
-    GPIO.setup(EMATCH_DETECT_PIN, GPIO.IN) # Read if Ematch has or hasn't been lit
+    GPIO.setup(Const.VENT_VALVE_DETECT_PIN, GPIO.IN) # Read position of vent valve (open or close)
+    GPIO.setup(Const.FUEL_SOLENOID_DETECT_PIN, GPIO.IN) # Read whether opr not we are fueling (open or close)
+    GPIO.setup(Const.EMATCH_DETECT_PIN, GPIO.IN) # Read if Ematch has or hasn't been lit
     
     ## GPIO.setup(MBVALVE_ACTUATING_DETECT_PIN, GPIO.IN)  ## USELESS?  Check belowdecks   avnoks  12 May 2019
     # GPIO.setup(DISCONNECT_DETECT_PIN, GPIO.IN)
@@ -139,7 +109,7 @@ def collectData():
         
         # Temperature Safety Check! Make sure tank isn't going to explode
         for thermocouple in TCs:
-            if (thermocouple.last_reading > CRIT_T and Is_Critical == False):
+            if (thermocouple.last_reading > Const.CRIT_T and Is_Critical == False):
                 emergency_shutdown()
                 Is_Critical = True  ## this prevents Pi from continuously calling emergency_shutdown() during a critical condition --- just calls it once.
                 print('EMERGENCY SHUTDOWN: Critical Temperature detected')
@@ -149,7 +119,7 @@ def collectData():
         
         # Pressure Safety Check! Make sure tank isn't going to explode
         for sensor in PTs:
-            if ((sensor.last_reading > CRIT_P) and (Is_Critical == False)):
+            if ((sensor.last_reading > Const.CRIT_P) and (Is_Critical == False)):
                 emergency_shutdown()
                 Is_Critical = True
                 print('EMERGENCY SHUTDOWN: Critical Pressure detected')
@@ -195,21 +165,21 @@ def collectData():
 # Tell ignition computer to close motorized ball valve.
 # Doesn't actually close the valve (that's the igcomp's job) --- hence the name
 def emergency_shutdown():
-    GPIO.output(EMERG_MBVALVE_SHUTOFF_PIN, True) #this needs to be a actuate ball valve function on its own
+    GPIO.output(Const.EMERG_MBVALVE_SHUTOFF_PIN, True) #this needs to be a actuate ball valve function on its own
     # Vent() # Ask DAAAAAAAN
 
 
 def Vent():
     """ Tell ignition computer to open venting solenoid
     """
-    GPIO.output(VENT_VALVE_SHUTOFF_PIN, True)
+    GPIO.output(Const.VENT_VALVE_SHUTOFF_PIN, True)
     VENTVALVE = True
     return VENTVALVE
      
 
 def getFuelSolState():
     try: 
-        return GPIO.input(FUEL_SOLENOID_DETECT_PIN)
+        return GPIO.input(Const.FUEL_SOLENOID_DETECT_PIN)
     except Exception as e:
         print(str(e))
         print("Error with getFuelSolState")
@@ -217,7 +187,7 @@ def getFuelSolState():
 
 def getVentState():
     try: 
-        return GPIO.input(VENT_VALVE_DETECT_PIN)
+        return GPIO.input(Const.VENT_VALVE_DETECT_PIN)
     except Exception as e:
         print(str(e))
         print("Error with getVentState")
@@ -225,12 +195,12 @@ def getVentState():
 
 
 # def getDisconnectState():
-#     return GPIO.input(DISCONNECT_DETECT_PIN)
+#     return GPIO.input(Const.DISCONNECT_DETECT_PIN)
 
 
 def getBallValveState():
     try: 
-        return GPIO.input(MBVALVE_DETECT_PIN)
+        return GPIO.input(Const.MBVALVE_DETECT_PIN)
     except Exception as e:
         print(str(e))
         print("Error with getBallValveState")
@@ -239,7 +209,7 @@ def getBallValveState():
 
 def getEmatchState():
     try: 
-        return GPIO.input(EMATCH_DETECT_PIN)
+        return GPIO.input(Const.EMATCH_DETECT_PIN)
     except Exception as e:
         print(str(e))
         print("Error with getEmatchState")
