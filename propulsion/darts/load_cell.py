@@ -29,7 +29,7 @@ class LoadCell:
         except(OSError, SerialException):
             # kludge, please handle exceptions properly
             self.loadcell = None
-            print ("Loadcell at {} did not connect".format{serport))
+            print ("Loadcell at {} did not connect".format(serport))
 
     # empty buffer until good data is present
     def read_and_verify(self):
