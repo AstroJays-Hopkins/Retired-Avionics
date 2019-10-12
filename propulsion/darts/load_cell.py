@@ -72,8 +72,9 @@ class LoadCell:
         # TODO: async function?
         if self.loadcell.in_waiting != 0:
             try:
-                self._clear_buffer()
                 self.last_read = self.read_and_verify()
+                # clear after read to prevent waiting on new data
+                self._clear_buffer()
             except (OSError, SerialError):
                 print("Failed to read loadcell at {}".format(self.loadcell.port))
                 self.last_read = "E[LC]"
