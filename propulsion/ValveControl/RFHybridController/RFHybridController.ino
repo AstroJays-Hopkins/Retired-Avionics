@@ -6,11 +6,11 @@ const int fuelSwitch = 4;
 const int ventSwitch = 5;
 
 //VARIABLES FOR IGNITION SAFETY AND BUTTON
-const int ignitionLock = 8;
-const int ignitionSwitch = 9;
+const int ignitionLock = 7;
+const int ignitionSwitch = 3;
 int tOpen = 0;
 
-const int BVSwitch = 10;
+const int BVSwitch = 6;
 
 //set variables for the condition of each switch
 //this corresponds to the desired state of the analogous solenoid
@@ -28,7 +28,7 @@ bool prevBVCommand = false;
 bool prevIgnitionCommand = false;
 bool prevFuelCommand = true;
 bool prevVentCommand = true;
-bool newCommand = true; 
+bool newCommand = false; 
 
 void setup() {
   //begin RF communiation
@@ -36,6 +36,7 @@ void setup() {
   LoRa.setTxPower(2);
   Serial.begin(9600);
   //set all switch pins to receive voltage
+  pinMode(BVSwitch, INPUT);
   pinMode(ventSwitch, INPUT);
   pinMode(fuelSwitch, INPUT);
   pinMode(ignitionSwitch, INPUT);
@@ -50,7 +51,7 @@ void ventCom(){
   } 
   else if(digitalRead(ventSwitch) == HIGH and prevVentCommand == false){
     CommandV = 0;
-    prevVentCommand = false;
+    prevVentCommand = true;
     newCommand = true;
   }
 }
@@ -60,7 +61,7 @@ void fuelCom() {
     CommandF = 1; //indicate fueling variable was sent
     prevFuelCommand = false;
     newCommand = true;
-  }else if (digitalRead(fuelSwitch) == HIGH and prevFuelCommand == true){
+  }else if (digitalRead(fuelSwitch) == HIGH and prevFuelCommand == false){
     CommandF = 0; //indicate stop fueling varaible was sent
     prevFuelCommand = true;
     newCommand = true;
@@ -75,7 +76,7 @@ void BV() {
       newCommand = true;
     }
   }
-  if (ignitionLock != HIGH) { // Control of bValve through button is only possible when ignition lock is UNLOCKED
+  if (true) { // Control of bValve through button is only possible when ignition lock is UNLOCKED
     if (digitalRead(BVSwitch) == HIGH and prevBVCommand == false){
       BValve = 1;
       prevBVCommand = true;
@@ -92,7 +93,7 @@ void BV() {
 void ignitionCom() {
   if (digitalRead(ignitionLock) == HIGH and digitalRead(ignitionSwitch) == HIGH and prevIgnitionCommand != true){ 
     //only execute ignition function if key switch is turned to ON position
-    BValve = 127; //indicate ignition variable was sent
+    BValve = 3; //indicate ignition variable was sent
     prevIgnitionCommand = true;
     newCommand = true;
   }
@@ -106,22 +107,22 @@ void getCom() { //check states, send commands to open/close valves to rocket
 }
 
 void loop() {
-  CommandV = -1; //set states to default holding state variables
-  CommandF = -1;
-  BValve = -1;
-  trimKey = -1;
+  CommandV = 2; //set states to default holding state variables
+  CommandF = 2;
+  BValve = 2;
+  trimKey = 2;
 
   getCom(); //detect desired states
   int8_t Command[3] = {CommandV, CommandF, BValve}; //compile data packet to send to solenoid actuator
   // Serial.println(Command); //DEBUG: display what you sent as the command
-  for(int i=0; i<3; i++){
-    Serial.print(Command[i]);
-  }
   if(newCommand){
-    LoRa.beginPacket(); //start transmission
     for(int i=0; i<3; i++){
-      LoRa.print(Command[i]); //just gonna send it, asuhh dudes
+      Serial.print(Command[i]);
+      Serial.println();
     }
-    LoRa.endPacket(); //end transmission
+    Serial.println("New Command");
+    Serial.println("------------------------------");
+    newCommand = false;
+    
   }
 }
