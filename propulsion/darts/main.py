@@ -52,6 +52,7 @@ LC_SEL_TUPLES = [(0, 0), (0, 1), (1, 0)] # Load cells
 
 # Set critical values
 CRIT_T = 309.5 # Critical Temperature in Kelvin
+# FIXME: Probably VERY WRONG 
 CRIT_P = 7240.0 # Critical pressure in ??????????
 
 
