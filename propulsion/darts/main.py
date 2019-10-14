@@ -9,7 +9,7 @@ import time
 from constants import Const
 from load_cell import LoadCellReader
 from RocketThermocouple import ThermocoupleReader
-import pressure_transducer as pt
+from pressure_transducer import PressureTransducerReader
 from SendToFlask import sendData
 ## import Server   # doesn't work
 # import QuickDisconnect as qd
@@ -52,7 +52,7 @@ LC_Reader = None
 TC_Reader = None
 
 # Place to put PT objects
-PTs = []
+PT_Reader = None
 
 
 def init():
@@ -66,12 +66,8 @@ def init():
 
     # Initialize PTs
     print(Const.PT_CHANNELS)
-    for pt_chan in Const.PT_CHANNELS:
-        try: 
-            PTs.append(pt.PressureTransducer(pt_chan))
-        except Exception as e:
-            print(e)
-            print("TC Error" + " " + str(pt_chan))
+    global PT_Reader
+    PT_Reader = PressureTransducerReader(Const.PT_CHANNELS)
 
     # Configure GPIO pin for telling the ignition computer to close the motorized ball valve in an emergency:
     GPIO.setup(Const.EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT) # Makes ball-valve pin an output pin
@@ -110,11 +106,12 @@ def collectData():
                 print('EMERGENCY SHUTDOWN: Critical Temperature detected')
         
         # Adding Pressure Transducer data
-        data.extend(pt.readPressureTransducers(PTs))
+        pressureList = PT_Reader.readPTs()
+        data.extend(pressureList)
         
         # Pressure Safety Check! Make sure tank isn't going to explode
-        for sensor in PTs:
-            if ((sensor.last_reading > Const.CRIT_P) and (Is_Critical == False)):
+        for pressure in pressureList:
+            if (isinstance(pressure, float) and pressure > Const.CRIT_P and (Is_Critical == False)):
                 emergency_shutdown()
                 Is_Critical = True
                 print('EMERGENCY SHUTDOWN: Critical Pressure detected')
