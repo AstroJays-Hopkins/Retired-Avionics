@@ -8,7 +8,7 @@ import threading
 import time
 from constants import Const
 from load_cell import LoadCellReader
-import RocketThermocouple as tc
+from RocketThermocouple import ThermocoupleReader
 import pressure_transducer as pt
 from SendToFlask import sendData
 ## import Server   # doesn't work
@@ -49,8 +49,7 @@ global Ser
 LC_Reader = None
 
 # Place to put TC objects
-TCs = []
-
+TC_Reader = None
 
 # Place to put PT objects
 PTs = []
@@ -60,15 +59,10 @@ def init():
     global LC_Reader
     LC_Reader = LoadCellReader(["/dev/usbLC0", "/dev/usbLC1", "/dev/usbLC2"])
     
-    spi = tc.begin();
     # Initialize thermocouples
     print(Const.TC_CS_PINS)
-    for cs_pin in Const.TC_CS_PINS:
-        try:
-            TCs.append(tc.Thermocouple(cs_pin, spi))
-        except Exception as e:
-            print(e)
-            print("TC Error" + " " + str(cs_pin))
+    global TC_Reader
+    TC_Reader = ThermocoupleReader(Const.TC_CS_PINS)
 
     # Initialize PTs
     print(Const.PT_CHANNELS)
@@ -104,12 +98,13 @@ def collectData():
         #global Is_Critical
         # See here for why we need the above line: https://stackoverflow.com/questions/10851906/python-3-unboundlocalerror-local-variable-referenced-before-assignment#10852003
         
-        # Adding thermocouple data 
-        data.extend(tc.readThermocouples(TCs))
+        # Adding thermocouple data
+        tempList = TC_Reader.readTCs()
+        data.extend(tempList)
         
         # Temperature Safety Check! Make sure tank isn't going to explode
-        for thermocouple in TCs:
-            if (thermocouple.last_reading > Const.CRIT_T and Is_Critical == False):
+        for temp in tempList:
+            if (isinstance(temp, float) and temp > Const.CRIT_T and Is_Critical == False):
                 emergency_shutdown()
                 Is_Critical = True  ## this prevents Pi from continuously calling emergency_shutdown() during a critical condition --- just calls it once.
                 print('EMERGENCY SHUTDOWN: Critical Temperature detected')
