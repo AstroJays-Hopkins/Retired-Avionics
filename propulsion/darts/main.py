@@ -7,20 +7,13 @@ from csv import writer
 import threading
 import time
 from constants import Const
+from engine_controller import EngineController
 from load_cell import LoadCellReader
 from RocketThermocouple import ThermocoupleReader
 from pressure_transducer import PressureTransducerReader
 from SendToFlask import sendData
 ## import Server   # doesn't work
-# import QuickDisconnect as qd
 
-
-# import general purpose input/output
-try:
-    import RPi.GPIO as GPIO  # RPi.GPIO documentation: https://sourceforge.net/p/raspberry-gpio-python/wiki/
-except:
-    print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
-   
 
 ### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
 ## --> No undefined variables  :)
@@ -29,8 +22,6 @@ except:
 # Hoopefully we don't start off in critical condition                                                       
 global Is_Critical
 Is_Critical = False
-QDSTATE = False # Quick Disconnect State, false for closed true for open
-VENTVALVE = False # Vent valve is open or closed, false for closed true for open
 
 
 ### VARIABLES TO STORE SENSOR OBJECTS ###
@@ -54,6 +45,9 @@ TC_Reader = None
 # Place to put PT objects
 PT_Reader = None
 
+# Engine controller interface
+ECI = None
+
 
 def init():
     global LC_Reader
@@ -69,20 +63,9 @@ def init():
     global PT_Reader
     PT_Reader = PressureTransducerReader(Const.PT_CHANNELS)
 
-    # Configure GPIO pin for telling the ignition computer to close the motorized ball valve in an emergency:
-    GPIO.setup(Const.EMERG_MBVALVE_SHUTOFF_PIN, GPIO.OUT) # Makes ball-valve pin an output pin
-    GPIO.output(Const.EMERG_MBVALVE_SHUTOFF_PIN, False) # Set pin outpuit to be false
-    GPIO.setup(Const.MBVALVE_DETECT_PIN, GPIO.IN) # Read position of ball valve (open or close)
-    
-    # Configure vent GPIO pins
-    GPIO.setup(Const.VENT_VALVE_DETECT_PIN, GPIO.IN) # Read position of vent valve (open or close)
-    GPIO.setup(Const.FUEL_SOLENOID_DETECT_PIN, GPIO.IN) # Read whether opr not we are fueling (open or close)
-    GPIO.setup(Const.EMATCH_DETECT_PIN, GPIO.IN) # Read if Ematch has or hasn't been lit
-    
-    ## GPIO.setup(MBVALVE_ACTUATING_DETECT_PIN, GPIO.IN)  ## USELESS?  Check belowdecks   avnoks  12 May 2019
-    # GPIO.setup(DISCONNECT_DETECT_PIN, GPIO.IN)
-    
-
+    # initialize engine controller communication interface
+    global ECI
+    ECI = EngineController()
 
 def collectData():
     """ Iterates through all sensors and collects data
@@ -101,7 +84,7 @@ def collectData():
         # Temperature Safety Check! Make sure tank isn't going to explode
         for temp in tempList:
             if (isinstance(temp, float) and temp > Const.CRIT_T and Is_Critical == False):
-                emergency_shutdown()
+                ECI.emergency_shutdown()
                 Is_Critical = True  ## this prevents Pi from continuously calling emergency_shutdown() during a critical condition --- just calls it once.
                 print('EMERGENCY SHUTDOWN: Critical Temperature detected')
         
@@ -112,7 +95,7 @@ def collectData():
         # Pressure Safety Check! Make sure tank isn't going to explode
         for pressure in pressureList:
             if (isinstance(pressure, float) and pressure > Const.CRIT_P and (Is_Critical == False)):
-                emergency_shutdown()
+                ECI.emergency_shutdown()
                 Is_Critical = True
                 print('EMERGENCY SHUTDOWN: Critical Pressure detected')
         # [*TC1 (Top), *TC2 (Bottom), TC3, TC4, TC5, TC6, *PT1 (Top), 
@@ -123,20 +106,22 @@ def collectData():
         data = data + LC_Reader.read_load_cells()
         # Adding whether or not solenoid is fueling
    #[*TC1 (Top), *TC2 (Bottom), TC3, TC4, TC5, TC6, *PT1 (Top), *PT2 (Bottom), PT3, *LC1 (NOX mass), LC2 (Thrust), LC3, *Sol1 (Fueling), *Sol2 (Venting), *Sol3 (Disconnect), *Sol4 (Reset), *Ballvalve, *Ignition]
-        data.append(getFuelSolState())
+        data.append(ECI.getFuelSolState())
         
         # Adding state of vent valve
-        data.append(getVentState())
+        data.append(ECI.getVentState())
         
         # Adding disconnect state information
         # data.append(getDisconnectState())
         data.extend(["E[DIS]", "E[RES]"])   # pads out spot that would have been occupied with disconnect/reset states
         
         # Adding ball valve state information
-        data.append(getBallValveState())
+        data.append(ECI.getBallValveState())
         
         # Adding ematch state information
-        data.append(getEmatchState())
+        data.append(ECI.getEmatchState())
+        # add ball valve movement state info
+        data.append(ECI.getBallValveMovingState())
         
         # Return list of datals
         return data
@@ -147,78 +132,7 @@ def collectData():
         return data
 
 
-########################################################################
-### OTHER FUNCTIONS ####################################################
-########################################################################
-
-## FIXME MAYBE  Should we have a function to order the arduino to open the ball valve?
-
-
-# Tell ignition computer to close motorized ball valve.
-# Doesn't actually close the valve (that's the igcomp's job) --- hence the name
-def emergency_shutdown():
-    GPIO.output(Const.EMERG_MBVALVE_SHUTOFF_PIN, True) #this needs to be a actuate ball valve function on its own
-    # Vent() # Ask DAAAAAAAN
-
-
-def Vent():
-    """ Tell ignition computer to open venting solenoid
-    """
-    GPIO.output(Const.VENT_VALVE_SHUTOFF_PIN, True)
-    VENTVALVE = True
-    return VENTVALVE
-     
-
-def getFuelSolState():
-    try: 
-        return GPIO.input(Const.FUEL_SOLENOID_DETECT_PIN)
-    except Exception as e:
-        print(str(e))
-        print("Error with getFuelSolState")
-        return "E[FSS]"
-
-def getVentState():
-    try: 
-        return GPIO.input(Const.VENT_VALVE_DETECT_PIN)
-    except Exception as e:
-        print(str(e))
-        print("Error with getVentState")
-        return "E[VS]"
-
-
-# def getDisconnectState():
-#     return GPIO.input(Const.DISCONNECT_DETECT_PIN)
-
-
-def getBallValveState():
-    try: 
-        return GPIO.input(Const.MBVALVE_DETECT_PIN)
-    except Exception as e:
-        print(str(e))
-        print("Error with getBallValveState")
-        return "E[BVS]"
-
-
-def getEmatchState():
-    try: 
-        return GPIO.input(Const.EMATCH_DETECT_PIN)
-    except Exception as e:
-        print(str(e))
-        print("Error with getEmatchState")
-        return "E[EMS]"
-    
-
-def getBallValveMovingState():
-    """ Checks pin from Arduino indicating if the ball valve is being actuated.
-    """
-    try: 
-        ## return GPIO.input(MBVALVE_ACTUATING_DETECT_PIN)
-        return 0
-    except Exception as e:
-        print(str(e))
-        print("Error with getMovingBallValveMovingState")
-        return "E[BVMS]"
-    
+   
 
 ########################################################################
 ### DATA LOGGING AND TRANSMISSION ######################################
@@ -265,7 +179,6 @@ def main(DATA_READ_INTERVAL=0.01):
             data = collectData()
             if data is not None:
                 try:
-                    data.append(getBallValveMovingState())
                     writedata(data_writer, data)
                     sendData(data)
                     print(data)
