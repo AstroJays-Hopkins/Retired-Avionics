@@ -31,7 +31,7 @@ class DACCLoop:
         ### VARIABLES TO STORE SENSOR OBJECTS ###
         # Data stores one reading from each sensor, dumps it somehwere else and
         # is then reset. This acts like a buffer/shovel between sensors and storage
-        self.data = []
+        self.data = {} 
         # Where load cell objects are stored
         # To access the last reading of an individual load cell i,
         # use LOAD_CELLS[i].last_reading
@@ -64,14 +64,14 @@ class DACCLoop:
         """
         try:
             # Initialize data array
-            self.data = []
+            self.data = {} 
 
             #global Is_Critical
             # See here for why we need the above line: https://stackoverflow.com/questions/10851906/python-3-unboundlocalerror-local-variable-referenced-before-assignment#10852003
 
             # Adding thermocouple data
             tempList = self.TC_Reader.readTCs()
-            self.data.extend(tempList)
+            self.data['TC'] = tempList
 
             # Temperature Safety Check! Make sure tank isn't going to explode
             for temp in tempList:
@@ -82,7 +82,7 @@ class DACCLoop:
 
             # Adding Pressure Transducer data
             pressureList = self.PT_Reader.readPTs()
-            self.data.extend(pressureList)
+            self.data['PT'] = pressureList
 
             # Pressure Safety Check! Make sure tank isn't going to explode
             for pressure in pressureList:
@@ -95,25 +95,24 @@ class DACCLoop:
             # *Sol1 (Fueling), *Sol2 (Venting), *Sol3 (Disconnect),
             # *Sol4 (Reset), *Ballvalve, *Ignition]
 
-            self.data = self.data + self.LC_Reader.read_load_cells()
+            self.data['LC'] = self.LC_Reader.read_load_cells()
             # Adding whether or not solenoid is fueling
        #[*TC1 (Top), *TC2 (Bottom), TC3, TC4, TC5, TC6, *PT1 (Top), *PT2 (Bottom), PT3, *LC1 (NOX mass), LC2 (Thrust), LC3, *Sol1 (Fueling), *Sol2 (Venting), *Sol3 (Disconnect), *Sol4 (Reset), *Ballvalve, *Ignition]
-            self.data.append(self.ECI.getFuelSolState())
 
             # Adding state of vent valve
-            self.data.append(self.ECI.getVentState())
+            self.data['VentValve'] = self.ECI.getVentState()
 
             # Adding disconnect state information
             # data.append(getDisconnectState())
-            self.data.extend(["E[DIS]", "E[RES]"])   # pads out spot that would have been occupied with disconnect/reset states
+            self.data['DisconnectState'] = ["E[DIS]", "E[RES]"]   # pads out spot that would have been occupied with disconnect/reset states
 
             # Adding ball valve state information
-            self.data.append(self.ECI.getBallValveState())
+            self.data['BallValveState'] = self.ECI.getBallValveState()
 
             # Adding ematch state information
-            self.data.append(self.ECI.getEmatchState())
+            self.data['Ematch'] = self.ECI.getEmatchState()
             # add ball valve movement state info
-            self.data.append(self.ECI.getBallValveMovingState())
+            self.data['BallValveMoving'] = self.ECI.getBallValveMovingState()
 
             # Return list of datals
             return self.data
@@ -138,6 +137,18 @@ def writedata(data_writer, args):
     packet.extend(args)
     data_writer.writerow(packet)
 
+def writedatadict(data_writer, data):
+    """ Write data to file (currently DATA1.csv)
+    """
+    packet = [datetime.now()]
+    for key in data:
+        if isinstance(data[key], list):
+            packet.extend(data[key])
+        else:
+            packet.append(data[key])
+    data_writer.writerow(packet)
+
+
 
 def main(DATA_READ_INTERVAL=0.01):
     loop = DACCLoop()
@@ -147,7 +158,7 @@ def main(DATA_READ_INTERVAL=0.01):
         data_writer = writer(log)
 
         #Header row so you know what you're looking at (change as necessary)
-        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','FuelValve','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
+        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
         
         # Initialize sensors
         try:
