@@ -1,3 +1,4 @@
+import json
 import requests
 from random import randint, random
 
@@ -11,6 +12,4 @@ from random import randint, random
 # requests.post('http://0.0.0.0:5000/loadData',params=payload)
 
 def sendData(data_array):
-    for i in range(len(data_array)):
-        data_array[i] = str(data_array[i])
-    requests.post('http://0.0.0.0:5000/loadData',params={'data':' '.join(data_array)})
+    requests.post('http://0.0.0.0:5000/loadData', json=data_array)
