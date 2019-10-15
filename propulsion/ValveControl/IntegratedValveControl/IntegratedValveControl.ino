@@ -17,12 +17,6 @@
  *
  */
 
-/*
- * Connections: 
- *   Ch. A --> Digital 2
- *   Ch. B --> Digital 3
- */
-
 //Commands will be sent via 915MHz radio communication
 #include <SPI.h>
 #include <LoRa.h>
@@ -55,102 +49,54 @@ const int burn_duration = 6500; // The duration for the ignition burn
 long burn_time = 0;
 int8_t commands[3];
 
+//BV valve timer variables
+long target_BV_stop_t;
+const long BV_move_duration;
 
 void turn_motor_off () {
   digitalWrite(Active_Relay_Pin, LOW);
   Valve_moving = LOW;
   digitalWrite(VALVE_MOVING_INDICATOR_PIN, LOW);
   Active_Relay_Pin = 0;
+  target_BV_stop_t = 0;
 }
 
-void turn_motor_on_forward () {
+void turn_motor_on(char dir) {
   // If the motor is on, turn it off first.
   if (Active_Relay_Pin) {
     turn_motor_off();
   }
-  digitalWrite(MOTOR_FORWARD_RELAY_PIN, HIGH);
-  Active_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
+  switch (dir){
+    case 1:
+      Active_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
+      Serial.println("BV FORWARD");
+      break;
+    case 0:
+      Active_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
+      Serial.println("BV BACKWARD");
+      break;
+  }
+  target_BV_stop_t = millis() + BV_move_duration;
+  digitalWrite(Active_Relay_Pin, HIGH);
   // Set valve moving state and pin
   Valve_moving = HIGH;
   digitalWrite(VALVE_MOVING_INDICATOR_PIN, HIGH);
-  Serial.println("BV FORWARD");
-}  
-
-void turn_motor_on_reverse () {
-  // If the motor is on, turn it off first.
-  if (Active_Relay_Pin) {
-    turn_motor_off();
-  }
-  digitalWrite(MOTOR_REVERSE_RELAY_PIN, HIGH);
-  Active_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
-  // Set valve state and pin
-  Valve_moving = HIGH;
-  digitalWrite(VALVE_MOVING_INDICATOR_PIN, HIGH);
-  Serial.println("BV BACKWARD");
 }
 
-/* *** MOTOR HALL EFFECT ENCODER *** */
-
-int Encoder_Pulse_Count[2] = {0, 0};
-                // Channels: {A, B}
-
-void reset_pulse_count () { 
-  Encoder_Pulse_Count[0] = 0;
-  Encoder_Pulse_Count[1] = 0;
-}
-
-// Increment pulse count for channel A
-void increment_channel_a () { 
-  Encoder_Pulse_Count[0] += 1;
-  check_rotation_and_stop_if_needed();
-}
-
-// Increment pulse count for channel B
-void increment_channel_b () { 
-  Encoder_Pulse_Count[1] += 1;
-  check_rotation_and_stop_if_needed();
-}
 
 bool ematch_continuity() { // Check if ematch is burnt through.
   return digitalRead(ematch_pin); 
 }
 
-/*
- * Gearbox between motor and ball valve has a 188:1 reduction ratio.  
- * To turn the ball valve \pi/2 radians, the motor has to spin 47 times.
- * The encoder produces 7 pulses per revolution.  
- * To spin the ball valve \pi/2 radians, we will need to count 329 pulses.
- */
-void check_rotation_and_stop_if_needed () {
-  /* Checks to see if motor has spun 90 degrees */
-  if ((Encoder_Pulse_Count[0] >= 329) || (Encoder_Pulse_Count[1] >= 329)) {
-    /* Shut off motor if that's the case. */
+void check_BV_time() {
+  /* Checks to see if motor has turned for the desired interval, 10 ms margin set in case the exact is missed for any reason.*/
+  if (abs(millis()-target_BV_stop_t) < 5) {
     turn_motor_off();
-    reset_pulse_count();
-    if (Active_Relay_Pin == MOTOR_REVERSE_RELAY_PIN) { 
-      // TODO What is the purpose of the incomplete control flow?
-    }
   }
 }
 
-void open_vent() { //open venting solenoid. NOTE: venting valve is opened when low, reverse of others.
-  digitalWrite(ventRelay,LOW);
-  Serial.println("VENT OPEN");
-}
-
-void close_vent() { // close venting solenoid
-  digitalWrite(ventRelay,HIGH);
-  Serial.println("VENT CLOSE");
-}
-
-void open_fuel() { //open fueling valve
-  digitalWrite(fuelRelay,HIGH);
-  Serial.println("FUEL OPEN");
-}
-
-void close_fuel() { //close fueling valve
-  digitalWrite(fuelRelay,LOW);
-  Serial.println("FUEL CLOSE");
+void switch_solenoid_valve(int valve_pin, int state){
+  digitalWrite(valve_pin, state);
 }
 
 void close_all() { //close all valves
@@ -161,17 +107,13 @@ void close_all() { //close all valves
 }
 
 void ignition() {
-  turn_motor_on_forward();
+  turn_motor_on(1);
 }
 
 void setup() {
   /* Initialize radio communication protocol */
   LoRa.begin(915E6);
   Serial.begin(9600);
-  
-  /* Initialize Hall effect pulse counter interrupts */
-  attachInterrupt(digitalPinToInterrupt(2), increment_channel_a, RISING);
-  attachInterrupt(digitalPinToInterrupt(3), increment_channel_b, RISING);
   
   /* Initialize relay signal pins */
   pinMode(MOTOR_FORWARD_RELAY_PIN, OUTPUT);
@@ -185,6 +127,8 @@ void setup() {
   //set default relay states to LOW (default)
   digitalWrite(ventRelay, HIGH);
   digitalWrite(fuelRelay, LOW);
+  digitalWrite(MOTOR_FORWARD_RELAY_PIN, LOW);
+  digitalWrite(MOTOR_FORWARD_RELAY_PIN, LOW);
   
   //setup timer2 interrupt for ignition procedure. 1kHz -> 64 prescalar + 249 compare interrupt
   // The control of the rocket will be disabled during ignition if delay() is used, which is blocking.
@@ -205,7 +149,7 @@ ISR(TIMER2_COMPA_vect){
     burn_time += 1;
     if (burn_time >= burn_duration){
       RECVD_IG_CMD = 0;
-      turn_motor_on_reverse();
+      turn_motor_on(0);
     }
   }
 }
@@ -244,14 +188,14 @@ void loop() {
   int8_t BV_Command = commands[0]; //check ball valve desired state
   switch (BV_Command) { //set desired ball valve state
   case 1: 
-    turn_motor_on_forward();
+    turn_motor_on(1);
     break;
   case 0:
-    turn_motor_on_reverse();
+    turn_motor_on(0);
     break;
   case 3: 
     Serial.println("RECVD IGNITION CMD...");
-    turn_motor_on_forward();
+    ignition();
     RECVD_IG_CMD = 1;
     break;
   case 2:
@@ -262,21 +206,26 @@ void loop() {
   int8_t Fuel_Command = commands[1]; //Check fuel valve desired state
   switch (Fuel_Command) { //set desired fuel valve
     case 1:
-      open_fuel();
+      switch_solenoid_valve(fuelRelay, 1); //Vent valve is normally closed.
+      Serial.println("FUEL CLOSE");
       break;
     case 0:
-      close_fuel();
+      switch_solenoid_valve(fuelRelay, 0);
+      Serial.println("FUEL CLOSE");
       break;
   }
   
   int8_t Vent_Command = commands[2]; //Check vent valve desired state
   switch (Vent_Command) { //set desired vent valve state
     case 1:
-      open_vent();
+      switch_solenoid_valve(ventRelay, 0); //Vent valve is normally open.
+      Serial.println("VENT OPEN");
       break;
     case 0:
-      close_vent();
+      switch_solenoid_valve(ventRelay, 1);
+      Serial.println("VENT CLOSE");
       break;
   }
+  check_BV_time();
   Serial.println("------------------------------");
 }
