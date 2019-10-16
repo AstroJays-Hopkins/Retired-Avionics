@@ -2,15 +2,16 @@
 #include <LoRa.h>
 
 //declare pins for fueling, venting, and disconnect/reset switches
-const int fuelSwitch = 4;
-const int ventSwitch = 5;
+const int fuelOnSwitch = 51;
+const int fuelOffSwitch = 53;
+const int ventSwitch = 41;
 
 //VARIABLES FOR IGNITION SAFETY AND BUTTON
-const int ignitionLock = 7;
-const int ignitionSwitch = 3;
+const int ignitionSwitch = 37;
 int tOpen = 0;
 
-const int BVSwitch = 6;
+const int BVFwdSwitch = 43;
+const int BVRevSwitch = 45;
 
 //set variables for the condition of each switch
 //this corresponds to the desired state of the analogous solenoid
@@ -35,12 +36,12 @@ void setup() {
   LoRa.begin(915E6);
   LoRa.setTxPower(2);
   Serial.begin(9600);
-  //set all switch pins to receive voltage
-  pinMode(BVSwitch, INPUT);
-  pinMode(ventSwitch, INPUT);
-  pinMode(fuelSwitch, INPUT);
+  // Set pullups on switch pins (see schematic)
+  pinMode(BVFwdSwitch, INPUT_PULLUP);
+  pinMode(BVRevSwitch, INPUT_PULLUP);
+  pinMode(ventSwitch, INPUT_PULLUP);
+  // Ignition is different due to LED and should not be pulled up
   pinMode(ignitionSwitch, INPUT);
-  pinMode(ignitionLock, INPUT);
 }
 
 void ventCom(){
@@ -57,11 +58,11 @@ void ventCom(){
 }
 
 void fuelCom() {
-  if (digitalRead(fuelSwitch) == LOW and prevFuelCommand == true){
+  if (digitalRead(fuelOnSwitch) == LOW and prevFuelCommand == true){
     CommandF = 1; //indicate fueling variable was sent
     prevFuelCommand = false;
     newCommand = true;
-  }else if (digitalRead(fuelSwitch) == HIGH and prevFuelCommand == false){
+  }else if (digitalRead(fuelOnSwitch) == HIGH and prevFuelCommand == false){
     CommandF = 0; //indicate stop fueling varaible was sent
     prevFuelCommand = true;
     newCommand = true;
