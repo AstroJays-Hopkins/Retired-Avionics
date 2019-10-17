@@ -1,17 +1,17 @@
 #include <SPI.h>
 #include <LoRa.h>
 
-//declare pins for fueling, venting, and disconnect/reset switches
-const int fuelOnSwitch = 51;
-const int fuelOffSwitch = 53;
-const int ventSwitch = 41;
+#include "util.h"
 
-//VARIABLES FOR IGNITION SAFETY AND BUTTON
-const int ignitionSwitch = 37;
+//declare pins for fueling, venting, and disconnect/reset switches
+SwInput fuelOn = SwInput(51);
+SwInput fuelOff = SwInput(53);
+SwInput ignition = SwInput(47);
+SwInput bvFwd = SwInput(43);
+SwInput bvRev = SwInput(45);
+SwInput vent = SwInput(41);
 int tOpen = 0;
 
-const int BVFwdSwitch = 43;
-const int BVRevSwitch = 45;
 
 //set variables for the condition of each switch
 //this corresponds to the desired state of the analogous solenoid
@@ -29,7 +29,7 @@ bool prevBVCommand = false;
 bool prevIgnitionCommand = false;
 bool prevFuelCommand = true;
 bool prevVentCommand = true;
-bool newCommand = false; 
+bool newCommand = false;
 
 void setup() {
   //begin RF communiation
@@ -37,20 +37,19 @@ void setup() {
   LoRa.setTxPower(2);
   Serial.begin(9600);
   // Set pullups on switch pins (see schematic)
-  pinMode(BVFwdSwitch, INPUT_PULLUP);
-  pinMode(BVRevSwitch, INPUT_PULLUP);
-  pinMode(ventSwitch, INPUT_PULLUP);
+  pinMode(bvFwd.pin, INPUT_PULLUP);
+  pinMode(bvRev.pin, INPUT_PULLUP);
+  pinMode(vent.pin, INPUT_PULLUP);
   // Ignition is different due to LED and should not be pulled up
-  pinMode(ignitionSwitch, INPUT);
+  pinMode(ignition.pin, INPUT);
 }
 
 void ventCom(){
-  if (digitalRead(ventSwitch) == LOW and prevVentCommand == true){
+  if(getButton(&vent) == LOW && prevVentCommand == true) {
     CommandV = 1; //indicate venting command was sent
     prevVentCommand = false;
     newCommand = true;
-  } 
-  else if(digitalRead(ventSwitch) == HIGH and prevVentCommand == false){
+  } else if(getButton(&vent) == HIGH && prevVentCommand == false) {
     CommandV = 0;
     prevVentCommand = true;
     newCommand = true;
@@ -58,11 +57,11 @@ void ventCom(){
 }
 
 void fuelCom() {
-  if (digitalRead(fuelOnSwitch) == LOW and prevFuelCommand == true){
+  if (getButton(&fuelOn) == LOW and prevFuelCommand == true){
     CommandF = 1; //indicate fueling variable was sent
     prevFuelCommand = false;
     newCommand = true;
-  }else if (digitalRead(fuelOnSwitch) == HIGH and prevFuelCommand == false){
+  } else if(getButton(&fuelOn) == HIGH and prevFuelCommand == false){
     CommandF = 0; //indicate stop fueling varaible was sent
     prevFuelCommand = true;
     newCommand = true;
@@ -73,26 +72,24 @@ void BV() {
   if (Serial.available()) { // The testing of valve via serial input, which can happen EVEN IF IGNITION LOCK IS LOW
     trimKey = Serial.read();
     if (trimKey == 1 or trimKey == 0){
-      BValve = trimKey; //indicate ball valve was driven in the direction determined by the 
+      BValve = trimKey; //indicate ball valve was driven in the direction determined by the
       newCommand = true;
     }
   }
-  if (true) { // Control of bValve through button is only possible when ignition lock is UNLOCKED
-    if (digitalRead(BVSwitch) == HIGH and prevBVCommand == false){
-      BValve = 1;
-      prevBVCommand = true;
-      newCommand = true;
-    }
-    else if(digitalRead(BVSwitch) == LOW and prevBVCommand == true){
-      BValve = 0;
-      prevBVCommand = false;
-      newCommand = true;
-    }
+  if(getButton(&bvFwd) == HIGH && prevBVCommand == false){
+    BValve = 1;
+    prevBVCommand = true;
+    newCommand = true;
+  }
+  else if(getButton(&bvFwd) == LOW && prevBVCommand == true){
+    BValve = 0;
+    prevBVCommand = false;
+    newCommand = true;
   }
 }
 
 void ignitionCom() {
-  if (digitalRead(ignitionLock) == HIGH and digitalRead(ignitionSwitch) == HIGH and prevIgnitionCommand != true){ 
+  if (getButton(&ignition) == HIGH && prevIgnitionCommand != true){
     //only execute ignition function if key switch is turned to ON position
     BValve = 3; //indicate ignition variable was sent
     prevIgnitionCommand = true;
@@ -102,7 +99,7 @@ void ignitionCom() {
 
 void getCom() { //check states, send commands to open/close valves to rocket
   ventCom();
-  fuelCom(); 
+  fuelCom();
   BV();
   ignitionCom();
 }
@@ -124,6 +121,6 @@ void loop() {
     Serial.println("New Command");
     Serial.println("------------------------------");
     newCommand = false;
-    
+
   }
 }
