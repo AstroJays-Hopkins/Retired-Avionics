@@ -26,6 +26,7 @@
 // Signal pin to relay that is currently powering motor.  If no relay is
 // currently on (running a motor), this variable will be 0 .
 int Active_Relay_Pin = 0;
+int Low_Relay_Pin = 0;
 // Signal pins to relays.
 // Program assumes that one relay spins the motor forwad and the other relay
 // is connected to the motor backwards to spin it in reverse.
@@ -55,6 +56,7 @@ const long BV_move_duration = 3000; // set to 3000ms for now, to be changed base
 
 void turn_motor_off () {
   digitalWrite(Active_Relay_Pin, LOW);
+  digitalWrite(Low_Relay_Pin, LOW);
   Valve_moving = LOW;
   digitalWrite(VALVE_MOVING_INDICATOR_PIN, LOW);
   Active_Relay_Pin = 0;
@@ -69,15 +71,18 @@ void turn_motor_on(char dir) {
   switch (dir){
     case 1:
       Active_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
+      Low_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
       Serial.println("BV FORWARD");
       break;
     case 0:
       Active_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
+      Low_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
       Serial.println("BV BACKWARD");
       break;
   }
   target_BV_stop_t = millis() + BV_move_duration;
   digitalWrite(Active_Relay_Pin, HIGH);
+  digitalWrite(Active_Relay_Pin, LOW);
   // Set valve moving state and pin
   Valve_moving = HIGH;
   digitalWrite(VALVE_MOVING_INDICATOR_PIN, HIGH);
