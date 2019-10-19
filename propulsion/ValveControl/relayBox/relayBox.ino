@@ -25,7 +25,7 @@ void loop() {
   }
 
   // Fire ematch if asked to do so
-  if (command[0] == 'I') {
+  if (command[0] == 51) {
     digitalWrite(EMATCH_RELAY_PIN, HIGH);
     IgnitingStart = millis();
   }
