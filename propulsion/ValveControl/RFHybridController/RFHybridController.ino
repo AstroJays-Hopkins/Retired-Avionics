@@ -12,15 +12,14 @@ SwInput bvRev = SwInput(45);
 SwInput vent = SwInput(41);
 int tOpen = 0;
 
-
-//set variables for the condition of each switch
-//this corresponds to the desired state of the analogous solenoid
 int8_t CommandV;
 int8_t CommandD;
 int8_t CommandF;
 int8_t BValve;
 int8_t trimKey;
 
+//set variables for the condition of each switch
+//this corresponds to the desired state of the analogous solenoid
 //variable to store list of desired states
 int8_t Command[3];
 
@@ -57,11 +56,11 @@ void ventCom(){
 }
 
 void fuelCom() {
-    if (getButton(&fuelOn) == LOW and prevFuelCommand == true){
+    if(getButton(&fuelOn) == LOW and prevFuelCommand == true) {
         CommandF = 1; //indicate fueling variable was sent
         prevFuelCommand = false;
         newCommand = true;
-    } else if(getButton(&fuelOn) == HIGH and prevFuelCommand == false){
+    } else if(getButton(&fuelOn) == HIGH and prevFuelCommand == false) {
         CommandF = 0; //indicate stop fueling varaible was sent
         prevFuelCommand = true;
         newCommand = true;
@@ -78,21 +77,23 @@ void BV() {
             BValve = trimKey;
             newCommand = true;
         }
-    }
-    if(getButton(&bvFwd) == HIGH && prevBVCommand == false){
+    } if(getButton(&bvFwd) == LOW && prevBVCommand == false) {
         BValve = 1;
         prevBVCommand = true;
         newCommand = true;
-    }
-    else if(getButton(&bvFwd) == LOW && prevBVCommand == true){
+    } else if(getButton(&bvRev) == LOW && prevBVCommand == false) {
         BValve = 0;
+        prevBVCommand = true;
+        newCommand = true;
+    } else if(getButton(&bvFwd) == HIGH && getButton(&bvRev) == HIGH && prevBVCommand == true) {
+        BValve = 2;
         prevBVCommand = false;
         newCommand = true;
     }
 }
 
 void ignitionCom() {
-    if (getButton(&ignition) == HIGH && prevIgnitionCommand != true){
+    if (getButton(&ignition) == HIGH && prevIgnitionCommand != true) {
         //only execute ignition function if key switch is turned to ON position
         BValve = 3; //indicate ignition variable was sent
         prevIgnitionCommand = true;
@@ -118,10 +119,12 @@ void loop() {
     int8_t Command[3] = {CommandV, CommandF, BValve};
     // Serial.println(Command); //DEBUG: display what you sent as the command
     if(newCommand){
+        LoRa.beginPacket(); //start transmission
         for(int i=0; i<3; i++){
             Serial.print(Command[i]);
-            Serial.println();
+            LoRa.print(Command[i]); //just gonna send it, asuhh dudes
         }
+        LoRa.endPacket();
         Serial.println("New Command");
         Serial.println("------------------------------");
         newCommand = false;
