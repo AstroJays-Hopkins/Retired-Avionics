@@ -24,7 +24,7 @@ namespace rkt {
 
     const uint8_t      CS_MAX_RETRIES    =   3;
     const unsigned int CS_BLINK_INT      = 100;
-    const unsigned int CS_RESEND_INT     = 500;
+    const unsigned int CS_RESEND_INT     = 800;
    
     // standard valve commands
     const uint8_t CMD_V_NOOP  = 0;

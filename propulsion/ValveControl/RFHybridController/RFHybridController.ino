@@ -94,7 +94,6 @@ void loop() {
 
     // Process heartbeat sends
     hb.process(now, &seq);
-    delay(100);
     // Process command sends
     cs.process(now, &seq);
 //    

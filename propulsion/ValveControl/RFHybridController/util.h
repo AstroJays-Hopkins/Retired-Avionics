@@ -114,6 +114,7 @@ int HeartBeat::process(unsigned long now, uint8_t* seq) {
 
 void HeartBeat::ack(int node, uint8_t seq) {
     if(seq == lastSeq) {
+        Serial.println("HB Acked");
         switch(node) {
             case 1:
                 EC.acked = true;
@@ -173,7 +174,6 @@ CommandSender::CommandSender() {
 
 void CommandSender::sendPacket(uint8_t dest, uint8_t seq) {
     beginPacket(rkt::ADDR_GS, dest, rkt::PKT_GS_STATE_SYNC);
-    LoRa.write(rkt::PKT_GS_STATE_SYNC);
     LoRa.write(seq);
     LoRa.write(MV_R1);
     LoRa.write(MV_S1);
@@ -206,13 +206,14 @@ void CommandSender::process(unsigned long now, uint8_t* seq) {
         Serial.print(MV_S1);
         Serial.print(", ");
         Serial.print(MV_G1);
+        Serial.print("; seq = ");
+        Serial.print(*seq);
         Serial.println("}");
-        sendPacket(rkt::ADDR_BCAST, seq);
+        sendPacket(rkt::ADDR_BCAST, *seq);
         resetSendState();
         lastSend = now;
         lastSeq = *seq;
         stopRetry = false;
-        newCommand = false;
         ++(*seq);
     } else if(!stopRetry) {
         if((now - lastBlink) >= rkt::CS_BLINK_INT) {
@@ -222,7 +223,7 @@ void CommandSender::process(unsigned long now, uint8_t* seq) {
         if((now - lastSend) >= rkt::CS_RESEND_INT) {
             Serial.println("Retrying...");
             resend(&EC, *seq);
-            resend(&RB, *seq);
+            //resend(&RB, *seq);
             lastSend = now;
             lastSeq = *seq;
             ++(*seq);
@@ -231,7 +232,8 @@ void CommandSender::process(unsigned long now, uint8_t* seq) {
 }
 
 void CommandSender::ack(uint8_t node, uint8_t seq) {
-    if(seq = lastSeq) {
+    if(seq == lastSeq) {
+        Serial.println("Command Acked");
         switch(node) {
             case rkt::ADDR_RKT:
                 EC.retries = 0;
@@ -256,7 +258,6 @@ void clearPacket() {
 }
 
 void processAckPacket(CommandSender* cs, HeartBeat* hb, uint8_t send_id) {
-    Serial.println("ack recieved");
     uint8_t seq = LoRa.read();
     cs->ack(send_id, seq);
     hb->ack(send_id, seq);
@@ -271,7 +272,7 @@ void procRadio(CommandSender* cs, HeartBeat* hb) {
             uint8_t send_id = address >> 4;
             switch(LoRa.read()) {
                 case rkt::PKT_ACK:
-                    processAckPacket;
+                    processAckPacket(cs, hb, send_id);
                     break;
                 default:
                     clearPacket();

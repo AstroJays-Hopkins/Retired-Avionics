@@ -21,7 +21,7 @@
 #include <SPI.h>
 #include <LoRa.h>
 
-const int packet_size = 3;
+const int packet_size = 4;
 
 /* *** MOTOR RELAY PINS for BV VALVES*** */
 // Signal pin to relay that is currently powering motor.  If no relay is
@@ -32,8 +32,8 @@ int Low_Relay_Pin = 0;
 // Signal pins to relays.
 // Program assumes that one relay spins the motor forwad and the other relay
 // is connected to the motor backwards to spin it in reverse.
-const int MOTOR_FORWARD_RELAY_PIN = 4;
-const int MOTOR_REVERSE_RELAY_PIN = 5;
+const int MOTOR_FORWARD_RELAY_PIN = 29;
+const int MOTOR_REVERSE_RELAY_PIN = 27;
 // Forward opens; reverse closes
 
 // Signal pins to Pi
@@ -47,7 +47,7 @@ bool Valve_state = false;   // HIGH -> open; LOW -> closed
 
 /* *** RELAY PINS for Solenoid Valves */
 const int fuelRelay = 6;
-const int ventRelay = 7;
+const int ventRelay = 23;
 
 /* *** IGNITION PARAMETER *** */
 bool RECVD_IG_CMD = 0;
@@ -116,7 +116,7 @@ void ignition() {
   turn_motor_on(1);
 }
 
-class SIGNAL_PACKET{
+class SignalPacket{
   private:
   byte self_id;
   byte cur_trans_id;
@@ -128,9 +128,7 @@ class SIGNAL_PACKET{
   int full_packet_size = packet_size+2;
 
   public: 
-  SIGNAL_PACKET()
-  {
-  }
+  SignalPacket(byte self_id): self_id{self_id} {};
 
   void set_self_id(byte cur_id){
     self_id = cur_id;
@@ -161,29 +159,26 @@ class SIGNAL_PACKET{
     }
   }
   
-  byte * get_ack_command(){
-    byte ack_code = cur_trans_id + (self_id<<4);
-    static byte ack_command[3] = {ack_code, 100, cur_sequence_code};
-    return ack_command;
+  void get_ack_command(byte* buf){ 
+    buf[0] = cur_trans_id + (self_id<<4);
+    buf[1] = 100;
+    buf[2] = cur_sequence_code;
   }
 };
 
-class RF_TR{
-  private: 
+class RfTr{
+  private:
   byte self_id;
-  SIGNAL_PACKET cur_packet;
+  SignalPacket cur_packet;
   char raw_data_packet[packet_size+2];
    
   public:
-  RF_TR(byte raw_self_id)
-  :self_id{raw_self_id}
-  {
-    LoRa.begin(915E6);
-    cur_packet.set_self_id(raw_self_id);
+  RfTr(byte raw_self_id): cur_packet(raw_self_id) {
   }
   
   byte check_id(byte * raw_cur_packet){
-    return (raw_cur_packet[0] && self_id) == self_id; 
+    byte recv_id = raw_cur_packet[0] & 0b1111;
+    return recv_id == self_id || recv_id == 15; 
   }
 
   void check_receive_packet(){
@@ -195,37 +190,50 @@ class RF_TR{
   int get_packet_size()
   {
     int packet_size = LoRa.parsePacket();
+    if(packet_size) Serial.println(packet_size);
     return packet_size;
   }
   
-  void receive_data(){
+  void receive_data() {
     int i = 0;
     while(LoRa.available()){
       byte command = LoRa.read();
       raw_data_packet[i] = command;
-      i ++;
+      ++i;
     }
+    Serial.println((byte) raw_data_packet[0]);
     if (check_id(raw_data_packet)){
+      Serial.print("Recieving data: {");
+      for (int j = 0; j<i; ++j) {
+        Serial.print((byte) raw_data_packet[j]);
+        Serial.print(", ");
+      }
+      Serial.println("}");
+
       cur_packet.refresh_cur_packet(raw_data_packet);
       send_ack();
     }
   }
 
-  void send_ack(){
-    byte * ack_command = cur_packet.get_ack_command();
+  void send_ack() {
+    Serial.println("sending ack");
+    byte buf[3];
     LoRa.beginPacket();
-    for(int i=0; i<3; i++){
-      LoRa.print(ack_command[0]);
-    }
+    cur_packet.get_ack_command(buf);
+    LoRa.write(buf, 3);
     LoRa.endPacket();
+
   }
 };
 
-RF_TR rf_tr = RF_TR(0b0001);
+RfTr rf_tr(0b0001);
+
 void setup() {
   /* Initialize radio communication protocol */
-  Serial.begin(9600);
-  
+  LoRa.begin(915E6);
+  LoRa.setTxPower(2);
+  Serial.begin(115200);
+
   /* Initialize relay signal pins */
   pinMode(MOTOR_FORWARD_RELAY_PIN, OUTPUT);
   pinMode(MOTOR_REVERSE_RELAY_PIN, OUTPUT);
@@ -269,11 +277,8 @@ ISR(TIMER2_COMPA_vect){
 void loop() {
   // Put code in to activate relays upon request.
   rf_tr.check_receive_packet();
-  for(int i=0; i<3; i++){
-    Serial.print(commands[i]);
-  }
     
-  int8_t BV_Command = commands[2]; //check ball valve desired state
+  int8_t BV_Command = commands[0]; //check ball valve desired state
   switch (BV_Command) { //set desired ball valve state
   case 49: 
     turn_motor_on(1);
@@ -293,31 +298,29 @@ void loop() {
     // Serial.println("HOLDING");
     break;
   }
-
-  int8_t Fuel_Command = commands[1]; //Check fuel valve desired state
-  switch (Fuel_Command) { //set desired fuel valve
-    case 1:
-      switch_solenoid_valve(fuelRelay, 1); //Vent valve is normally closed.
-      commands[1] = 2;
-      Serial.println("FUEL CLOSE");
-      break;
-    case 0:
-      switch_solenoid_valve(fuelRelay, 0);
-      commands[1] = 2;
-      Serial.println("FUEL CLOSE");
-      break;
-  }
+//
+//  int8_t Fuel_Command = commands[2]; //Check fuel valve desired state
+//  switch (Fuel_Command) { //set desired fuel valve
+//    case 1:
+//      switch_solenoid_valve(fuelRelay, 1); //Vent valve is normally closed.
+//      commands[1] = 2;
+//      Serial.println("FUEL CLOSE");
+//      break;
+//    case 0:
+//      switch_solenoid_valve(fuelRelay, 0);
+//      commands[1] = 2;
+//      Serial.println("FUEL CLOSE");
+//      break;
+//  }
   
-  int8_t Vent_Command = commands[0]; //Check vent valve desired state
+  int8_t Vent_Command = commands[1]; //Check vent valve desired state
   switch (Vent_Command) { //set desired vent valve state
-    case 1:
+    case 2:
       switch_solenoid_valve(ventRelay, 0); //Vent valve is normally open.
-      Serial.println("VENT OPEN");
       commands[0] = 2;
       break;
-    case 0:
+    case 1:
       switch_solenoid_valve(ventRelay, 1);
-      Serial.println("VENT CLOSE");
       commands[0] = 2;
       break;
   }
