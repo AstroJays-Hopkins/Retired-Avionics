@@ -114,14 +114,15 @@ int HeartBeat::process(unsigned long now, uint8_t* seq) {
 
 void HeartBeat::ack(int node, uint8_t seq) {
     if(seq == lastSeq) {
-        Serial.println("HB Acked");
         switch(node) {
             case 1:
+                Serial.println("EC HB Acked");
                 EC.acked = true;
                 EC.missed = 0;
                 digitalWrite(EC.err_led, LOW);
                 break;
             case 2:
+                Serial.println("RB HB Acked");
                 RB.acked = true;
                 RB.missed = 0;
                 digitalWrite(RB.err_led, LOW);
@@ -182,11 +183,14 @@ void CommandSender::sendPacket(uint8_t dest, uint8_t seq) {
 }
 
 void CommandSender::resend(CState* node, uint8_t seq) {
-    sendPacket(node->addr, seq);
-    ++node->retries;
-    if(node->retries > rkt::CS_MAX_RETRIES) {
-       digitalWrite(rkt::LED_COM, HIGH);
-       stopRetry = true;
+    if (! node->acked) {
+        node->addr == 1? Serial.println("retrying EC") : Serial.println("retrying RB");
+        sendPacket(node->addr, seq);
+        ++node->retries;
+        if(node->retries > rkt::CS_MAX_RETRIES) {
+           digitalWrite(rkt::LED_COM, HIGH);
+           stopRetry = true;
+        }
     }
 }
 
@@ -223,7 +227,7 @@ void CommandSender::process(unsigned long now, uint8_t* seq) {
         if((now - lastSend) >= rkt::CS_RESEND_INT) {
             Serial.println("Retrying...");
             resend(&EC, *seq);
-            //resend(&RB, *seq);
+            resend(&RB, *seq);
             lastSend = now;
             lastSeq = *seq;
             ++(*seq);

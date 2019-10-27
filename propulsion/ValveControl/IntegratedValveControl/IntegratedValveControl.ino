@@ -173,12 +173,20 @@ class RfTr{
   char raw_data_packet[packet_size+2];
    
   public:
-  RfTr(byte raw_self_id): cur_packet(raw_self_id) {
+  RfTr(byte raw_self_id): cur_packet(raw_self_id), self_id{raw_self_id} {
   }
   
   byte check_id(byte * raw_cur_packet){
     byte recv_id = raw_cur_packet[0] & 0b1111;
-    return recv_id == self_id || recv_id == 15; 
+    Serial.print("recv  id: ");
+    Serial.println(recv_id);
+    if(recv_id == self_id || recv_id == 15) {
+      Serial.println("id match");
+      return true;
+    }  else {
+      Serial.println("id mismatch");
+      return false;
+    }
   }
 
   void check_receive_packet(){
@@ -190,7 +198,6 @@ class RfTr{
   int get_packet_size()
   {
     int packet_size = LoRa.parsePacket();
-    if(packet_size) Serial.println(packet_size);
     return packet_size;
   }
   
@@ -201,7 +208,7 @@ class RfTr{
       raw_data_packet[i] = command;
       ++i;
     }
-    Serial.println((byte) raw_data_packet[0]);
+    Serial.println((byte) raw_data_packet[0], BIN);
     if (check_id(raw_data_packet)){
       Serial.print("Recieving data: {");
       for (int j = 0; j<i; ++j) {
