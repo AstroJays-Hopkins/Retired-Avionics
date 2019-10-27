@@ -1,5 +1,5 @@
-#ifndef __CONSTANTS_H__
-#define __CONSTANTS_H__
+#ifndef __CONST_COMMON_H__
+#define __CONST_COMMON_H__
 
 namespace rkt {
     const uint8_t ADDR_GS    = 0b0000;
@@ -13,18 +13,12 @@ namespace rkt {
     const uint8_t PKT_ACK           = 100;
     const uint8_t PKT_NACK          = 101;
 
-    const uint8_t LED_SYS_ERR     = 31;
-    const uint8_t LED_RKT_ACK_ERR = 33;
-    const uint8_t LED_IGC_ACK_ERR = 35;
-    const uint8_t LED_COM         = 37;
-    const uint8_t LED_LINK        = 39;
-
     const uint8_t      HB_MAX_MISSED =   12;
-    const unsigned int HB_INT        = 2500;
+    const unsigned long HB_INT        = 2500;
 
     const uint8_t      CS_MAX_RETRIES    =   3;
     const unsigned int CS_BLINK_INT      = 100;
-    const unsigned int CS_RESEND_INT     = 800;
+    const unsigned int CS_RESEND_INT     = 700;
    
     // standard valve commands
     const uint8_t CMD_V_NOOP  = 0;

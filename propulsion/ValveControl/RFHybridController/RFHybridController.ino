@@ -2,7 +2,8 @@
 #include <LoRa.h>
 #include <MemoryFree.h>
 
-#include "constants.h"
+#include "const-common.h"
+#include "const-gs.h"
 #include "util.h"
 
 //declare pins for fueling, venting, and disconnect/reset switches
