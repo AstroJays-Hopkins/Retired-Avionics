@@ -20,6 +20,7 @@
 //Commands will be sent via 915MHz radio communication
 #include <SPI.h>
 #include <LoRa.h>
+#include <Wire.h>
 
 const int packet_size = 4;
 
@@ -36,10 +37,6 @@ const int MOTOR_FORWARD_RELAY_PIN = 29;
 const int MOTOR_REVERSE_RELAY_PIN = 27;
 // Forward opens; reverse closes
 
-// Signal pins to Pi
-const int VALVE_MOVING_INDICATOR_PIN = 8;
-const int VALVE_STATE_INDICATOR_PIN = 9;
-const int ematch_pin = 3;
 // States for the above pins
 bool Valve_moving = true;  // If HIGH -> valve is moving; LOW -> not moving
 bool Valve_state = false;   // HIGH -> open; LOW -> closed 
@@ -48,6 +45,9 @@ bool Valve_state = false;   // HIGH -> open; LOW -> closed
 /* *** RELAY PINS for Solenoid Valves */
 const int fuelRelay = 6;
 const int ventRelay = 23;
+//States for the above pins
+bool Fuel_state = true;
+bool Vent_state = true;
 
 /* *** IGNITION PARAMETER *** */
 bool RECVD_IG_CMD = 0;
@@ -64,7 +64,6 @@ void turn_motor_off () {
   digitalWrite(Active_Relay_Pin, LOW);
   digitalWrite(Low_Relay_Pin, LOW);
   Valve_moving = LOW;
-  digitalWrite(VALVE_MOVING_INDICATOR_PIN, LOW);
   Active_Relay_Pin = 0;
   target_BV_stop_t = 0;
 }
@@ -92,13 +91,10 @@ void turn_motor_on(char dir) {
   digitalWrite(Low_Relay_Pin, LOW);
   // Set valve moving state and pin
   Valve_moving = HIGH;
-  digitalWrite(VALVE_MOVING_INDICATOR_PIN, HIGH);
 }
 
 
-bool ematch_continuity() { // Check if ematch is burnt through.
-  return digitalRead(ematch_pin); 
-}
+bool ematch_continuity = false; // Check if ematch is burnt through.
 
 void check_BV_time() {
   /* Checks to see if motor has turned for the desired interval, 10 ms margin set in case the exact is missed for any reason.*/
@@ -114,6 +110,23 @@ void switch_solenoid_valve(int valve_pin, int state){
 
 void ignition() {
   turn_motor_on(1);
+}
+
+//Every time data is requested, send data back.
+void request_callback() {
+  byte ecstate = 0;
+  ecstate += (int) Vent_state ; //vent 
+  ecstate += (int) Valve_moving << 1; //ball valve Moving
+  ecstate += (int) Valve_state << 2; //ball valve
+  ecstate += (int) ematch_continuity << 3; //e-match
+  ecstate += (int) Fuel_state << 4; //fuel
+  Wire.write(ecstate);
+}
+
+void receive_callback() {
+  byte dog = Wire.read();
+  dog = (int) && ; 
+  dog
 }
 
 class SignalPacket{
@@ -237,7 +250,6 @@ void setup() {
   /* Initialize relay signal pins */
   pinMode(MOTOR_FORWARD_RELAY_PIN, OUTPUT);
   pinMode(MOTOR_REVERSE_RELAY_PIN, OUTPUT);
-  pinMode(ematch_pin, INPUT);
   
   //set relay pins to output voltage
   pinMode(ventRelay,OUTPUT);
@@ -264,7 +276,7 @@ void setup() {
 }
 
 ISR(TIMER2_COMPA_vect){
-  if (RECVD_IG_CMD && ematch_continuity()){
+  if (RECVD_IG_CMD && (ematch_continuity = true) ){
     burn_time += 1;
     if (burn_time >= burn_duration){
       RECVD_IG_CMD = 0;
