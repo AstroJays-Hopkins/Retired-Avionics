@@ -16,8 +16,11 @@ class Const:
 
     # Setting inputs from arduino/raspberryPi
     PT_CHANNELS = [P0,P1,P2] # List of pressure transducer pins
-    TC_CS_PINS = [board.D17, board.D27, board.D22, board.D5, 
+    TC_CS_PINS = [board.D17, board.D27, board.D22, board.D5,
                   board.D6, board.D26] # List of thermocouple pins
+    I2C_ADDR_SC = 0x11
+    I2C_ADDR_EC = 0x10
+
     LC_SEL_TUPLES = [(0, 0), (0, 1), (1, 0)] # Load cells
     # LC_SEL_TUPLES = ((0, 0), (0, 1), (1, 0)) # Load cells # should this be a list of tuples?
     # TC_CS_PINS = [17,27,22,5,6,13]

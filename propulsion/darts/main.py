@@ -6,6 +6,8 @@ from datetime import datetime
 from csv import writer
 import threading
 import time
+import board
+import busio
 from constants import Const
 from engine_controller import EngineController
 from load_cell import LoadCellReader
@@ -42,6 +44,8 @@ class DACCLoop:
         self.PT_Reader = None
         # Engine controller interface
         self.ECI = None
+        # global i2c object
+        self.i2c = busio.I2C(board.SCL, board.SDA)
 
 
     def init(self):
@@ -55,9 +59,9 @@ class DACCLoop:
         self.TC_Reader = ThermocoupleReader(Const.TC_CS_PINS)
         # Initialize PTs
         print(Const.PT_CHANNELS)
-        self.PT_Reader = PressureTransducerReader(Const.PT_CHANNELS)
+        self.PT_Reader = PressureTransducerReader(Const.PT_CHANNELS, self.i2c)
         # initialize engine controller communication interface
-        self.ECI = EngineController()
+        self.ECI = EngineController(self.i2c)
 
     def collectData(self):
         """ Iterates through all sensors and collects data
@@ -65,6 +69,8 @@ class DACCLoop:
         try:
             # Initialize data array
             self.data = {} 
+            # update cached ECI state
+            self.ECI.update()
 
             #global Is_Critical
             # See here for why we need the above line: https://stackoverflow.com/questions/10851906/python-3-unboundlocalerror-local-variable-referenced-before-assignment#10852003
@@ -147,8 +153,8 @@ def writedatadict(data_writer, data):
     packet.append(data['VentValve'])
     packet.extend(data['DisconnectState'])
     packet.append(data['BallValveState'])
-    packet.extend(data['Ematch'])
-    packet.extend(data['BallVavleMoving'])
+    packet.append(data['Ematch'])
+    packet.append(data['BallValveMoving'])
     data_writer.writerow(packet)
 
 def writedataheader(data_writer, data):
@@ -172,7 +178,7 @@ def main(DATA_READ_INTERVAL=0.01):
         data_writer = writer(log)
 
         #Header row so you know what you're looking at (change as necessary)
-         data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
+        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
         
         # Initialize sensors
         try:

@@ -26,7 +26,7 @@ class PressureTransducerReader:
     Batch reader for more than one pressure transducer. You probably want to
     use this.
     '''
-    def __init__(self, adc_channels):
+    def __init__(self, adc_channels, i2c):
         '''
         Initialize i2c bus and create one PressureTransducer object per channel
         specified in pt_channels
@@ -37,7 +37,7 @@ class PressureTransducerReader:
         self.PTs = []
         try:
             # Create the I2C bus
-            self.i2c = busio.I2C(board.SCL, board.SDA)
+            self.i2c = i2c
             # Create the ADC object using the I2C bus
             self.ADS = ADS.ADS1115(self.i2c)
         except Exception as e:
