@@ -141,13 +141,27 @@ def writedatadict(data_writer, data):
     """ Write data to file (currently DATA1.csv)
     """
     packet = [datetime.now()]
-    for key in data:
-        if isinstance(data[key], list):
-            packet.extend(data[key])
-        else:
-            packet.append(data[key])
+    packet.extend(data['TC'])
+    packet.extend(data['PT'])
+    packet.extend(data['LC'])
+    packet.append(data['VentValve'])
+    packet.extend(data['DisconnectState'])
+    packet.append(data['BallValveState'])
+    packet.extend(data['Ematch'])
+    packet.extend(data['BallVavleMoving'])
     data_writer.writerow(packet)
 
+def writedataheader(data_writer, data):
+    """ Write data to file (currently DATA1.csv)
+    """
+    packet = ['Timestamp']
+    for key in data:
+        if isinstance(data[key], list):
+            for i in range(1, len(data[key]) + 1):
+                    packet.append(key + str(i))
+        else:
+            packet.append(key)
+    data_writer.writerow(packet)
 
 
 def main(DATA_READ_INTERVAL=0.01):
@@ -158,7 +172,7 @@ def main(DATA_READ_INTERVAL=0.01):
         data_writer = writer(log)
 
         #Header row so you know what you're looking at (change as necessary)
-        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
+         data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
         
         # Initialize sensors
         try:
@@ -166,7 +180,6 @@ def main(DATA_READ_INTERVAL=0.01):
         except Exception as e:
             print(e)
             print("Error in initialization")
-        
         # Print out a reminder (maybe remove this)
         print("!!!!!!!!!!!!!!!!DO BE AWARE that there is an extra value"
             "printed to the terminal that indicates whether or not the "
@@ -182,7 +195,7 @@ def main(DATA_READ_INTERVAL=0.01):
             data = loop.collectData()
             if data is not None:
                 try:
-                    writedata(data_writer, data)
+                    writedatadict(data_writer, data)
                     sendData(data)
                     print(data)
                 except Exception as e:
