@@ -29,6 +29,7 @@ const int packet_size = 4;
 // currently on (running a motor), this variable will be 0 .
 int Active_Relay_Pin = 0;
 int Low_Relay_Pin = 0;
+const int PIN_EMATCH_CONT = 52;
 
 // Signal pins to relays.
 // Program assumes that one relay spins the motor forwad and the other relay
@@ -38,7 +39,8 @@ const int MOTOR_REVERSE_RELAY_PIN = 27;
 // Forward opens; reverse closes
 
 // States for the above pins
-bool Valve_moving = true;  // If HIGH -> valve is moving; LOW -> not moving
+bool Valve_moving = false;  // If HIGH -> valve is moving; LOW -> not moving
+bool req_valve_state = false;
 bool Valve_state = false;   // HIGH -> open; LOW -> closed 
 
 
@@ -46,8 +48,8 @@ bool Valve_state = false;   // HIGH -> open; LOW -> closed
 const int fuelRelay = 6;
 const int ventRelay = 23;
 //States for the above pins
-bool Fuel_state = true;
-bool Vent_state = true;
+bool Fuel_state = false;
+bool Vent_state = false;
 
 /* *** IGNITION PARAMETER *** */
 bool RECVD_IG_CMD = 0;
@@ -64,6 +66,7 @@ void turn_motor_off () {
   digitalWrite(Active_Relay_Pin, LOW);
   digitalWrite(Low_Relay_Pin, LOW);
   Valve_moving = LOW;
+  Valve_state = req_valve_state;
   Active_Relay_Pin = 0;
   target_BV_stop_t = 0;
 }
@@ -77,11 +80,13 @@ void turn_motor_on(char dir) {
     case 1:
       Active_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
       Low_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
+      req_valve_state = true;
       Serial.println("BV FORWARD");
       break;
     case 0:
       Active_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
       Low_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
+      req_valve_state = false;
       Serial.println("BV BACKWARD");
       break;
   }
@@ -112,10 +117,13 @@ void ignition() {
   turn_motor_on(1);
 }
 
+void emergency() {
+    // fill with emergency code
+}
+
 //Every time data is requested, send data back.
-void request_callback() {
-  byte ecstate = 0;
-  ecstate += (int) Vent_state ; //vent 
+void writeI2C() {
+  uint8_t ecstate = (int) Vent_state ; //vent
   ecstate += (int) Valve_moving << 1; //ball valve Moving
   ecstate += (int) Valve_state << 2; //ball valve
   ecstate += (int) ematch_continuity << 3; //e-match
@@ -123,10 +131,12 @@ void request_callback() {
   Wire.write(ecstate);
 }
 
-void receive_callback() {
-  byte dog = Wire.read();
-  dog = (int) && ; 
-  dog
+void readI2C() {
+  byte command = Wire.read();
+  // read off vent command
+  commands[2] = (command & (0b11 << 1)) >> 1;
+  // emergency shutdown command
+  if(command & 0b1) emergency();
 }
 
 class SignalPacket{
@@ -152,7 +162,7 @@ class SignalPacket{
     return cur_packet_type == 1;
   }
   
-  void refresh_cur_packet(char* p_cur_packet)
+  void refresh_cur_packet(byte* p_cur_packet)
   {
     cur_recvd_packet = p_cur_packet;
     cur_trans_id = cur_recvd_packet[0] >> 4;
@@ -253,6 +263,9 @@ void setup() {
   LoRa.begin(915E6);
   LoRa.setTxPower(2);
   Serial.begin(115200);
+  Wire.begin(0x10);
+  Wire.onReceive(readI2C);
+  Wire.onRequest(writeI2C);
 
   /* Initialize relay signal pins */
   pinMode(MOTOR_FORWARD_RELAY_PIN, OUTPUT);
@@ -292,10 +305,14 @@ ISR(TIMER2_COMPA_vect){
   }
 }
 
+void checkEMatchCont() {
+  ematch_continuity = digitalRead(PIN_EMATCH_CONT);
+}
 
 void loop() {
   // Put code in to activate relays upon request.
   rf_tr.check_receive_packet();
+  checkEMatchCont();
     
   int8_t BV_Command = commands[0]; //check ball valve desired state
   switch (BV_Command) { //set desired ball valve state
@@ -317,28 +334,28 @@ void loop() {
     // Serial.println("HOLDING");
     break;
   }
-//
-//  int8_t Fuel_Command = commands[2]; //Check fuel valve desired state
-//  switch (Fuel_Command) { //set desired fuel valve
-//    case 1:
-//      switch_solenoid_valve(fuelRelay, 1); //Vent valve is normally closed.
-//      commands[1] = 2;
-//      Serial.println("FUEL CLOSE");
-//      break;
-//    case 0:
-//      switch_solenoid_valve(fuelRelay, 0);
-//      commands[1] = 2;
-//      Serial.println("FUEL CLOSE");
-//      break;
-//  }
+
+  int8_t Fuel_Command = commands[2]; //Check fuel valve desired state
+  switch (Fuel_Command) { //set desired fuel valve
+    case 2:
+      Fuel_state = true;
+      Serial.println("FUEL OPEN");
+      break;
+    case 1:
+      Fuel_state = false;
+      Serial.println("FUEL CLOSE");
+      break;
+  }
   
   int8_t Vent_Command = commands[1]; //Check vent valve desired state
   switch (Vent_Command) { //set desired vent valve state
     case 2:
+      Vent_state = true;
       switch_solenoid_valve(ventRelay, 0); //Vent valve is normally open.
       commands[0] = 2;
       break;
     case 1:
+      Vent_state = false;
       switch_solenoid_valve(ventRelay, 1);
       commands[0] = 2;
       break;
