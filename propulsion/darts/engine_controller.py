@@ -112,7 +112,7 @@ class EngineController:
 
         if(self.state['MV_G1'] != self.SCVState):
             self._buf[0] = int(self.state['MV_G1']) + 1
-            self._writeI2C(self.sc_device)
+            self._writeI2C(self._sc_device)
             self.SCVState = self.state['MV_G1']
 
     def getFuelSolState(self):
