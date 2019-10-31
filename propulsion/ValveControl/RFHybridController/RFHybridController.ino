@@ -96,6 +96,7 @@ void ignitionCom() {
         Serial.println("Ignition engaged");
         cs.MV_S1 = rkt::CMD_V_IGNITE;
         cs.newCommand = true;
+        ignited = true;
     }
 }
 
@@ -116,7 +117,7 @@ void loop() {
     ventCom();
     fuelCom();
     BV();
-//    ignitionCom();
+    ignitionCom();
 
     // Process heartbeat sends
     hb.process(now, &seq);
