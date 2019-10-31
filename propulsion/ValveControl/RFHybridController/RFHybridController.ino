@@ -7,6 +7,7 @@
 #include "util.h"
 
 //declare pins for fueling, venting, and disconnect/reset switches
+SwInput SV_R1_Ena(rkt::PIN_IN_SV_R1_ENA);
 SwInput fuelOn = SwInput(rkt::PIN_IN_MV_G1_OPEN);
 SwInput fuelOff = SwInput(rkt::PIN_IN_MV_G1_CLOSE);
 SwInput ignition = SwInput(rkt::PIN_IN_IGNITION);
@@ -30,6 +31,7 @@ void setup() {
     pinMode(rkt::LED_IGC_ACK_ERR, OUTPUT);
     pinMode(rkt::LED_COM, OUTPUT);
     pinMode(rkt::LED_LINK, OUTPUT);
+    pinMode(SV_R1_Ena.pin, INPUT_PULLUP);
     pinMode(fuelOn.pin, INPUT_PULLUP);
     pinMode(fuelOff.pin, INPUT_PULLUP);
     pinMode(bvFwd.pin, INPUT_PULLUP);
@@ -40,14 +42,22 @@ void setup() {
 }
 
 void ventCom() {
-    if(getButton(&vent) == LOW && cs.MV_S1 != rkt::CMD_V_OPEN) {
+    if(getButton(&SV_R1_Ena) == HIGH && cs.MV_S1 != rkt::CMD_V_CLOSE) {
         Serial.println("Vent open");
-        cs.MV_S1 = rkt::CMD_V_OPEN;
-        cs.newCommand = true;
-    } else if(getButton(&vent) == HIGH && cs.MV_S1 != rkt::CMD_V_CLOSE) {
-        Serial.println("Vent close");
         cs.MV_S1 = rkt::CMD_V_CLOSE;
         cs.newCommand = true;
+    }
+    
+    if(getButton(&SV_R1_Ena) == LOW) {
+        if(getButton(&vent) == LOW && cs.MV_S1 != rkt::CMD_V_CLOSE) {
+            Serial.println("Vent close");
+            cs.MV_S1 = rkt::CMD_V_CLOSE;
+            cs.newCommand = true;
+        } else if(getButton(&vent) == HIGH && cs.MV_S1 != rkt::CMD_V_OPEN) {
+            Serial.println("Vent open");
+            cs.MV_S1 = rkt::CMD_V_OPEN;
+            cs.newCommand = true;
+        }
     }
 }
 
@@ -82,7 +92,7 @@ void BV() {
 
 void ignitionCom() {
     // fill meeeeeeee
-    if(getButton(&ignition) == LOW && !ignited) {
+    if(getButton(&ignition) == HIGH && !ignited) {
         Serial.println("Ignition engaged");
         cs.MV_S1 = rkt::CMD_V_IGNITE;
         cs.newCommand = true;
