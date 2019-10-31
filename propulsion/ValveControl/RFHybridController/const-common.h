@@ -13,7 +13,7 @@ namespace rkt {
     const uint8_t PKT_ACK           = 100;
     const uint8_t PKT_NACK          = 101;
 
-    const uint8_t      HB_MAX_MISSED =   12;
+    const uint8_t       HB_MAX_MISSED =   12;
     const unsigned long HB_INT        = 2500;
 
     const uint8_t      CS_MAX_RETRIES    =   3;
@@ -24,6 +24,8 @@ namespace rkt {
     const uint8_t CMD_V_NOOP  = 0;
     const uint8_t CMD_V_CLOSE = 1;
     const uint8_t CMD_V_OPEN  = 2;
+    // special "valve" command to ignite
+    const uint8_t CMD_V_IGNITE = 255;
 }
 
 #endif
