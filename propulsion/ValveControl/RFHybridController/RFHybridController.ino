@@ -94,7 +94,7 @@ void ignitionCom() {
     // fill meeeeeeee
     if(getButton(&ignition) == HIGH && !ignited) {
         Serial.println("Ignition engaged");
-        cs.MV_S1 = rkt::CMD_V_IGNITE;
+        cs.MV_R1 = rkt::CMD_V_IGNITE;
         cs.newCommand = true;
         ignited = true;
     }
