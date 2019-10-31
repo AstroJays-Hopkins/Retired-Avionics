@@ -2,6 +2,7 @@
 #define __CONST_GS_H__
 
 namespace rkt {
+    const uint8_t PIN_IN_SV_R1_ENA   = 49;
     const uint8_t PIN_IN_MV_G1_OPEN  = 48;
     const uint8_t PIN_IN_IGNITION    = 47;
     const uint8_t PIN_IN_MV_G1_CLOSE = 46;
