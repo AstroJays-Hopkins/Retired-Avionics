@@ -59,7 +59,7 @@ byte commands[3];
 
 //BV valve timer variables
 long target_BV_stop_t;
-const long BV_move_duration = 1000; // set to 3000ms for now, to be changed based on the actual run time of ball valve.
+const long BV_move_duration = 500; // set to 3000ms for now, to be changed based on the actual run time of ball valve.
 
 void turn_motor_off () {
   Serial.println("motor_turned_off");
@@ -81,13 +81,13 @@ void turn_motor_on(char dir) {
       Active_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
       Low_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
       req_valve_state = true;
-      Serial.println("BV FORWARD");
+      Serial.println("BV CLOSE");
       break;
     case 0:
       Active_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
       Low_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
       req_valve_state = false;
-      Serial.println("BV BACKWARD");
+      Serial.println("BV OPEN");
       break;
   }
   target_BV_stop_t = millis() + BV_move_duration;
@@ -123,7 +123,7 @@ void emergency() {
 
 //Every time data is requested, send data back.
 void writeI2C() {
-  uint8_t ecstate = (int) Vent_state ; //vent
+  uint8_t ecstate = (int) Vent_state; //vent
   ecstate += (int) Valve_moving << 1; //ball valve Moving
   ecstate += (int) Valve_state << 2; //ball valve
   ecstate += (int) ematch_continuity << 3; //e-match
@@ -316,13 +316,15 @@ void loop() {
     
   int8_t BV_Command = commands[0]; //check ball valve desired state
   switch (BV_Command) { //set desired ball valve state
-  case 49: 
-    turn_motor_on(1);
-    commands[2] = 2;
-    break;
-  case 50:
+  case 2:
+    Serial.println("Valve Open");
     turn_motor_on(0);
-    commands[2] = 2;
+    commands[2] = 0;
+    break;
+  case 1:
+    Serial.println("valve close");
+    turn_motor_on(1);
+    commands[2] = 0;
     break;
   case 255: // TODO check char types
     Serial.println("RECVD IGNITION CMD...");
@@ -330,13 +332,13 @@ void loop() {
     RECVD_IG_CMD = 1;
     commands[0] = 2;
     break;
-  case 48:
+  case 0:
     // Serial.println("HOLDING");
     break;
   }
 
   int8_t Fuel_Command = commands[2]; //Check fuel valve desired state
-  switch (Fuel_Command) { //set desired fuel valve
+  switch (Fuel_Command) { //set desired fuel valve state
     case 2:
       Fuel_state = true;
       Serial.println("FUEL OPEN");
@@ -361,5 +363,8 @@ void loop() {
       break;
   }
   check_BV_time();
+  commands[0] = 0;
+  commands[1] = 0;
+  commands[2] = 0;
   //Serial.println("------------------------------");
 }
