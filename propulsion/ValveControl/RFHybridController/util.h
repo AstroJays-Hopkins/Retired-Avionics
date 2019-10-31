@@ -1,5 +1,8 @@
 #include <LoRa.h>
 
+#include "const-common.h"
+#include "const-gs.h"
+
 #ifndef __UTIL_H__
 #define __UTIL_H__
 /* 
@@ -167,9 +170,9 @@ class CommandSender {
 CommandSender::CommandSender() {
     EC.addr = rkt::ADDR_RKT;
     RB.addr = rkt::ADDR_RB;
-    MV_R1 = 0;
-    MV_G1 = 0;
-    MV_S1 = 0;
+    MV_R1 = rkt::CMD_V_NOOP;
+    MV_G1 = rkt::CMD_V_NOOP;
+    MV_S1 = rkt::CMD_V_CLOSE;
     stopRetry = true;
 }
 
