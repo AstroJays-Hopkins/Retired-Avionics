@@ -21,6 +21,7 @@
 #include <SPI.h>
 #include <LoRa.h>
 #include <Wire.h>
+#include <TimerOne.h>
 
 #include "motor.h"
 #include "radio.h"
@@ -46,7 +47,8 @@ bool Vent_state = false;
 
 /* *** IGNITION PARAMETER *** */
 bool RECVD_IG_CMD = 0;
-const int burn_duration = 6500; // The duration for the ignition burn
+bool shut_bv_after_ignition = false;
+const int burn_duration = 650; // The duration for the ignition burn, in 10ms.
 long burn_time = 0;
 
 bool ematch_continuity = false; // Check if ematch is burnt through.
@@ -135,14 +137,17 @@ void setup() {
   Serial.print("Set Pulses: ");
   Serial.println(MV_R1.set_pulses);
   sei();
+  Timer1.initialize(100);
+  Timer1.attachInterrupt(ignition_duration_check);
 }
 
-ISR(TIMER2_COMPA_vect){
+void ignition_duration_check(){
   if (RECVD_IG_CMD && (ematch_continuity = true) ){
     burn_time += 1;
     if (burn_time >= burn_duration){
       RECVD_IG_CMD = 0;
       MV_R1.actuate(2);
+      shut_bv_after_ignition = true;
     }
   }
 }
@@ -162,6 +167,11 @@ void loop() {
   // Put code in to activate relays upon request.
   rf_tr.check_receive_packet();
   checkEMatchCont();
+
+  if(shut_bv_after_ignition){
+    turn_motor_on(0);
+    shut_bv_after_ignition = false;
+  }
     
   int8_t BV_Command = commands[0]; //check ball valve desired state
   switch (BV_Command) { //set desired ball valve state
