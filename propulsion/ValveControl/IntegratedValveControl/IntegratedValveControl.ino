@@ -21,6 +21,7 @@
 #include <SPI.h>
 #include <LoRa.h>
 #include <Wire.h>
+#include <TimerOne.h>
 
 const int packet_size = 4;
 
@@ -53,7 +54,8 @@ bool Vent_state = false;
 
 /* *** IGNITION PARAMETER *** */
 bool RECVD_IG_CMD = 0;
-const int burn_duration = 6500; // The duration for the ignition burn
+bool shut_bv_after_ignition = false;
+const int burn_duration = 650; // The duration for the ignition burn, in 10ms.
 long burn_time = 0;
 byte commands[3];
 
@@ -283,24 +285,16 @@ void setup() {
   
   //setup timer2 interrupt for ignition procedure. 1kHz -> 64 prescalar + 249 compare interrupt
   // The control of the rocket will be disabled during ignition if delay() is used, which is blocking.
-  TCCR2A = 0;
-  TCCR2B = 0;
-  TCNT2 = 0;
-  OCR2A = 249;
-  
-  TCCR2A |= (1 << WGM21);
-  TCCR2B |= (1 << CS22);
-  TIMSK2 |= (1 << OCIE2A);
-  
-  sei();
+  Timer1.initialize(100);
+  Timer1.attachInterrupt(ignition_duration_check);
 }
 
-ISR(TIMER2_COMPA_vect){
+void ignition_duration_check(){
   if (RECVD_IG_CMD && (ematch_continuity = true) ){
     burn_time += 1;
     if (burn_time >= burn_duration){
       RECVD_IG_CMD = 0;
-      turn_motor_on(0);
+      shut_bv_after_ignition = true;
     }
   }
 }
@@ -313,6 +307,11 @@ void loop() {
   // Put code in to activate relays upon request.
   rf_tr.check_receive_packet();
   checkEMatchCont();
+
+  if(shut_bv_after_ignition){
+    turn_motor_on(0);
+    shut_bv_after_ignition = false;
+  }
     
   int8_t BV_Command = commands[0]; //check ball valve desired state
   switch (BV_Command) { //set desired ball valve state
