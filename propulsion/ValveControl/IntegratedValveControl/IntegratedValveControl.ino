@@ -22,7 +22,8 @@
 #include <LoRa.h>
 #include <Wire.h>
 
-const int packet_size = 4;
+#include "motor.h"
+#include "radio.h"
 
 /* *** MOTOR RELAY PINS for BV VALVES*** */
 // Signal pin to relay that is currently powering motor.  If no relay is
@@ -31,16 +32,8 @@ int Active_Relay_Pin = 0;
 int Low_Relay_Pin = 0;
 const int PIN_EMATCH_CONT = 52;
 
-// Signal pins to relays.
-// Program assumes that one relay spins the motor forwad and the other relay
-// is connected to the motor backwards to spin it in reverse.
-const int MOTOR_FORWARD_RELAY_PIN = 29;
-const int MOTOR_REVERSE_RELAY_PIN = 27;
-// Forward opens; reverse closes
 
 // States for the above pins
-bool Valve_moving = false;  // If HIGH -> valve is moving; LOW -> not moving
-bool req_valve_state = false;
 bool Valve_state = false;   // HIGH -> open; LOW -> closed 
 
 
@@ -55,66 +48,26 @@ bool Vent_state = false;
 bool RECVD_IG_CMD = 0;
 const int burn_duration = 6500; // The duration for the ignition burn
 long burn_time = 0;
-byte commands[3];
-
-//BV valve timer variables
-long target_BV_stop_t;
-const long BV_move_duration = 500; // set to 3000ms for now, to be changed based on the actual run time of ball valve.
-
-void turn_motor_off () {
-  Serial.println("motor_turned_off");
-  digitalWrite(Active_Relay_Pin, LOW);
-  digitalWrite(Low_Relay_Pin, LOW);
-  Valve_moving = LOW;
-  Valve_state = req_valve_state;
-  Active_Relay_Pin = 0;
-  target_BV_stop_t = 0;
-}
-
-void turn_motor_on(char dir) {
-  // If the motor is on, turn it off first.
-  if (Active_Relay_Pin) {
-    turn_motor_off();
-  }
-  switch (dir){
-    case 1:
-      Active_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
-      Low_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
-      req_valve_state = true;
-      Serial.println("BV CLOSE");
-      break;
-    case 0:
-      Active_Relay_Pin = MOTOR_REVERSE_RELAY_PIN;
-      Low_Relay_Pin = MOTOR_FORWARD_RELAY_PIN;
-      req_valve_state = false;
-      Serial.println("BV OPEN");
-      break;
-  }
-  target_BV_stop_t = millis() + BV_move_duration;
-  Serial.println(target_BV_stop_t);
-  digitalWrite(Active_Relay_Pin, HIGH);
-  digitalWrite(Low_Relay_Pin, LOW);
-  // Set valve moving state and pin
-  Valve_moving = HIGH;
-}
-
 
 bool ematch_continuity = false; // Check if ematch is burnt through.
 
-void check_BV_time() {
-  /* Checks to see if motor has turned for the desired interval, 10 ms margin set in case the exact is missed for any reason.*/
-  if (abs(millis()-target_BV_stop_t) < 5 && Valve_moving == HIGH) {
-    turn_motor_off();
-    Serial.println("TURNING BV OFF!!!");
-  }
+DCMotorController MV_R1(320*1.4);
+
+void MV_R1_pulse() {
+  MV_R1.handlePulseEvent();
 }
+
+void MV_R1_limit() {
+  MV_R1.handleLimitSwitch();
+}
+
 
 void switch_solenoid_valve(int valve_pin, int state){
   digitalWrite(valve_pin, state);
 }
 
 void ignition() {
-  turn_motor_on(1);
+  MV_R1.actuate(1);
 }
 
 void emergency() {
@@ -124,8 +77,8 @@ void emergency() {
 //Every time data is requested, send data back.
 void writeI2C() {
   uint8_t ecstate = (int) Vent_state; //vent
-  ecstate += (int) Valve_moving << 1; //ball valve Moving
-  ecstate += (int) Valve_state << 2; //ball valve
+  ecstate += (int) MV_R1.valve_moving << 1; //ball valve Moving
+  ecstate += (int) MV_R1.state << 2; //ball valve
   ecstate += (int) ematch_continuity << 3; //e-match
   ecstate += (int) Fuel_state << 4; //fuel
   Wire.write(ecstate);
@@ -139,123 +92,6 @@ void readI2C() {
   if(command & 0b1) emergency();
 }
 
-class SignalPacket{
-  private:
-  byte self_id;
-  byte cur_trans_id;
-  byte cur_packet_type;
-  byte cur_sequence_code;
-  byte* cur_recvd_packet;
-  byte* cur_recvd_command;
-  byte* cur_ack_command;
-  int full_packet_size = packet_size+2;
-
-  public: 
-  SignalPacket(byte self_id): self_id{self_id} {};
-
-  void set_self_id(byte cur_id){
-    self_id = cur_id;
-  }
-
-  bool is_command()
-  {
-    return cur_packet_type == 1;
-  }
-  
-  void refresh_cur_packet(byte* p_cur_packet)
-  {
-    cur_recvd_packet = p_cur_packet;
-    cur_trans_id = cur_recvd_packet[0] >> 4;
-    cur_packet_type = cur_recvd_packet[1];
-    cur_sequence_code = cur_recvd_packet[2];
-    if (is_command()){
-      cur_recvd_command = cur_recvd_packet + 3;
-      update_cur_global_command();
-    }
-  }
-
-  void update_cur_global_command(){ // update the global variable command
-    if (is_command()){
-      for (int i=0; i<3; i++){
-        commands[i] = cur_recvd_command[i];
-      }
-    }
-  }
-  
-  void get_ack_command(byte* buf){ 
-    buf[0] = cur_trans_id + (self_id<<4);
-    buf[1] = 100;
-    buf[2] = cur_sequence_code;
-  }
-};
-
-class RfTr{
-  private:
-  byte self_id;
-  SignalPacket cur_packet;
-  char raw_data_packet[packet_size+2];
-   
-  public:
-  RfTr(byte raw_self_id): cur_packet(raw_self_id), self_id{raw_self_id} {
-  }
-  
-  byte check_id(byte * raw_cur_packet){
-    byte recv_id = raw_cur_packet[0] & 0b1111;
-    Serial.print("recv  id: ");
-    Serial.println(recv_id);
-    if(recv_id == self_id || recv_id == 15) {
-      Serial.println("id match");
-      return true;
-    }  else {
-      Serial.println("id mismatch");
-      return false;
-    }
-  }
-
-  void check_receive_packet(){
-    if (get_packet_size()){
-      receive_data();
-    }
-  }
-
-  int get_packet_size()
-  {
-    int packet_size = LoRa.parsePacket();
-    return packet_size;
-  }
-  
-  void receive_data() {
-    int i = 0;
-    while(LoRa.available()){
-      byte command = LoRa.read();
-      raw_data_packet[i] = command;
-      ++i;
-    }
-    Serial.println((byte) raw_data_packet[0], BIN);
-    if (check_id(raw_data_packet)){
-      Serial.print("Recieving data: {");
-      for (int j = 0; j<i; ++j) {
-        Serial.print((byte) raw_data_packet[j]);
-        Serial.print(", ");
-      }
-      Serial.println("}");
-
-      cur_packet.refresh_cur_packet(raw_data_packet);
-      send_ack();
-    }
-  }
-
-  void send_ack() {
-    Serial.println("sending ack");
-    byte buf[3];
-    LoRa.beginPacket();
-    cur_packet.get_ack_command(buf);
-    LoRa.write(buf, 3);
-    LoRa.endPacket();
-
-  }
-};
-
 RfTr rf_tr(0b0001);
 
 void setup() {
@@ -268,19 +104,24 @@ void setup() {
   Wire.onRequest(writeI2C);
 
   /* Initialize relay signal pins */
-  pinMode(MOTOR_FORWARD_RELAY_PIN, OUTPUT);
-  pinMode(MOTOR_REVERSE_RELAY_PIN, OUTPUT);
+  pinMode(rkt::PIN_MOTOR_FWD, OUTPUT);
+  pinMode(rkt::PIN_MOTOR_REV, OUTPUT);
   
   //set relay pins to output voltage
   pinMode(ventRelay,OUTPUT);
   pinMode(fuelRelay, OUTPUT);
+  pinMode(rkt::PIN_INTR_ENCODER, INPUT);
+  pinMode(rkt::PIN_INTR_LIMIT, INPUT_PULLUP);
+
+  attachInterrupt(digitalPinToInterrupt(rkt::PIN_INTR_ENCODER), MV_R1_pulse, RISING);
+  attachInterrupt(digitalPinToInterrupt(rkt::PIN_INTR_LIMIT), MV_R1_limit, FALLING);
 
   //set default relay states to LOW (default)
   digitalWrite(ventRelay, HIGH);
   digitalWrite(fuelRelay, LOW);
-  digitalWrite(MOTOR_FORWARD_RELAY_PIN, LOW);
-  digitalWrite(MOTOR_REVERSE_RELAY_PIN, LOW);
-  
+  digitalWrite(rkt::PIN_MOTOR_FWD, LOW);
+  digitalWrite(rkt::PIN_MOTOR_REV, LOW);
+
   //setup timer2 interrupt for ignition procedure. 1kHz -> 64 prescalar + 249 compare interrupt
   // The control of the rocket will be disabled during ignition if delay() is used, which is blocking.
   TCCR2A = 0;
@@ -291,7 +132,8 @@ void setup() {
   TCCR2A |= (1 << WGM21);
   TCCR2B |= (1 << CS22);
   TIMSK2 |= (1 << OCIE2A);
-  
+  Serial.print("Set Pulses: ");
+  Serial.println(MV_R1.set_pulses);
   sei();
 }
 
@@ -300,7 +142,7 @@ ISR(TIMER2_COMPA_vect){
     burn_time += 1;
     if (burn_time >= burn_duration){
       RECVD_IG_CMD = 0;
-      turn_motor_on(0);
+      MV_R1.actuate(2);
     }
   }
 }
@@ -309,7 +151,14 @@ void checkEMatchCont() {
   ematch_continuity = digitalRead(PIN_EMATCH_CONT);
 }
 
+int curPulse = 0;
+
 void loop() {
+//  if(curPulse != MV_R1.current_pulses) {
+//    curPulse = MV_R1.current_pulses;
+//    Serial.print("PULSE CHANGED: ");
+//    Serial.println(curPulse);
+//  }
   // Put code in to activate relays upon request.
   rf_tr.check_receive_packet();
   checkEMatchCont();
@@ -318,12 +167,12 @@ void loop() {
   switch (BV_Command) { //set desired ball valve state
   case 2:
     Serial.println("Valve Open");
-    turn_motor_on(0);
+    MV_R1.actuate(2);
     commands[2] = 0;
     break;
   case 1:
     Serial.println("valve close");
-    turn_motor_on(1);
+    MV_R1.actuate(1);
     commands[2] = 0;
     break;
   case 255: // TODO check char types
@@ -362,7 +211,6 @@ void loop() {
       commands[0] = 2;
       break;
   }
-  check_BV_time();
   commands[0] = 0;
   commands[1] = 0;
   commands[2] = 0;
