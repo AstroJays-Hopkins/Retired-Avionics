@@ -51,11 +51,11 @@ void loop() {
     Serial.println("Actuating!");
     switch(actuate) {
         case 1:
-          move(90, false);
+          move(94, false);
           state = 1;
           break;
         case 2:
-          move(90, true);
+          move(94, true);
           state = 2;
           break;   
     }

@@ -3,9 +3,9 @@
 
 namespace rkt {
     const uint8_t PIN_IN_SV_R1_ENA   = 49;
-    const uint8_t PIN_IN_MV_G1_OPEN  = 48;
+    const uint8_t PIN_IN_MV_G1_CLOSE = 48;
     const uint8_t PIN_IN_IGNITION    = 47;
-    const uint8_t PIN_IN_MV_G1_CLOSE = 46;
+    const uint8_t PIN_IN_MV_G1_OPEN  = 46;
     const uint8_t PIN_IN_MV_R1_CLOSE = 45;
     const uint8_t PIN_IN_MV_R1_OPEN  = 43;
     const uint8_t PIN_IN_VENT        = 41;

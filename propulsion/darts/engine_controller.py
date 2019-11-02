@@ -44,11 +44,15 @@ class EngineController:
         self.updateFailed = False
         self.SCVState = False
         self.ecCommand = 0b0
+        self.firstrun = True
         self.state = {'MV_S1': None,
                       'MV_R1': None,
                       'MV_R1_moving': None,
                       'MV_G1': None,
                       'eMatch': None}
+        self.update()
+        self.SCVState = self.state['MV_G1']
+        self.firstrun = False
 
     def _writeI2C(self, device):
         '''
@@ -103,6 +107,7 @@ class EngineController:
             print(str(e))
             print("Error with updating engine data")
             self.updateFailed = True
+        print(bin(self._buf[0]))
 
         self.state['MV_G1']        = bool((self._buf[0] >> 4) & 0b1)
         self.state['eMatch']       = bool((self._buf[0] >> 3) & 0b1)
@@ -110,8 +115,9 @@ class EngineController:
         self.state['MV_R1_moving'] = bool((self._buf[0] >> 1) & 0b1)
         self.state['MV_S1']        = bool(self._buf[0] & 0b1)
 
-        if(self.state['MV_G1'] != self.SCVState):
-            self._buf[0] = int(self.state['MV_G1']) + 1
+        if(not self.firstrun and self.state['MV_G1'] != self.SCVState):
+            self._buf[0] = int(self.state['MV_G1'] + 1)
+            print("moving G1: {}".format(str(self._buf[0])))
             self._writeI2C(self._sc_device)
             self.SCVState = self.state['MV_G1']
 
