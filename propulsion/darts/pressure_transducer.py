@@ -8,17 +8,24 @@ class PressureTransducer:
     def __init__(self, Global_ADS, adc_channel):
         self.chan = AnalogIn(Global_ADS, adc_channel)
         self.last_reading = -1
+        self.aFactor = 0
+        self.bFactor = 0
+
     # PT produces maximum of 4.5V at 5076.32 PSI
     # and minimum of 0.5V at 0 PSI
     def readPressure(self):
         try:
-            self.last_reading = (self.chan.voltage - 0.5) * (5076.32 / 4)
+            self.last_reading = self.chan.voltage * self.aFactor + self.bFactor
             return self.last_reading
         except Exception as e:
             print("!!! Error whilst reading PTs:")
             print(str(e))
             print("Returning \"E\"")
             return "E"
+
+    def abCal(self, a, b):
+        self.aFactor = a
+        self.bFactor = b
 
 
 class PressureTransducerReader:

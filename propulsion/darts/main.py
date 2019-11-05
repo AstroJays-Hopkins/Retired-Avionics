@@ -60,6 +60,9 @@ class DACCLoop:
         # Initialize PTs
         print(Const.PT_CHANNELS)
         self.PT_Reader = PressureTransducerReader(Const.PT_CHANNELS, self.i2c)
+        self.PT_Reader.PTs[0].abCal(1975.240839, -638.151357)
+        self.PT_Reader.PTs[1].abCal(1974.901263, -634.1506982)
+        self.PT_Reader.PTs[2].abCal(1994.141548, -645.6156099)
         # initialize engine controller communication interface
         self.ECI = EngineController(self.i2c)
 
