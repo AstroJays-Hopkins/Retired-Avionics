@@ -202,13 +202,13 @@ void loop() {
   switch (Vent_Command) { //set desired vent valve state
     case 2:
       Vent_state = true;
-      switch_solenoid_valve(ventRelay, 0); //Vent valve is normally open.
+      switch_solenoid_valve(ventRelay, 1); //Vent valve is normally open.
       commands[0] = 2;
       break;
     case 1:
       Vent_state = false;
-      switch_solenoid_valve(ventRelay, 1);
-      commands[0] = 2;
+      switch_solenoid_valve(ventRelay, 0);
+      commands[0] = 1;
       break;
   }
   commands[0] = 0;
