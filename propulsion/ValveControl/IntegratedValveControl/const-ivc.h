@@ -9,5 +9,7 @@ namespace rkt {
     // Forward opens; reverse closes
     const int PIN_INTR_ENCODER = 18;
     const int PIN_INTR_LIMIT   = 19;
+
+    const int MV_R1_CLICKS = 438;
 }
 #endif

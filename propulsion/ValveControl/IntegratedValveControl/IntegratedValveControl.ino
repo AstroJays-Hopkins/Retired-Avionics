@@ -54,7 +54,7 @@ long burn_time = 0;
 
 bool ematch_continuity = false; // Check if ematch is burnt through.
 
-DCMotorController MV_R1(320*1.4);
+DCMotorController MV_R1(rkt::MV_R1_CLICKS);
 
 void MV_R1_pulse() {
   MV_R1.handlePulseEvent();
