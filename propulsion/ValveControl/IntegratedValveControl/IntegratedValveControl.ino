@@ -46,7 +46,8 @@ bool Fuel_state = false;
 bool Vent_state = false;
 
 /* *** IGNITION PARAMETER *** */
-bool RECVD_IG_CMD = 0;
+volatile uint8_t igniter_x_cnt = 0;
+volatile bool ignited = false;
 bool shut_bv_after_ignition = false;
 const int burn_duration = 650; // The duration for the ignition burn, in 10ms.
 long burn_time = 0;
@@ -69,7 +70,16 @@ void switch_solenoid_valve(int valve_pin, int state){
 }
 
 void ignition() {
-  MV_R1.actuate(1);
+  // The ignition function will run twice before we actually want it to ignite
+  // Once when the interrupt is attached, and once when the timer is started
+  if (igniter_x_cnt > 1) {
+    MV_R1.actuate(2);
+    Timer1.stop();
+    // Timer1.detachInterrupt();
+    igniter_x_cnt = 1;
+  } else {
+    ++igniter_x_cnt;
+  }
 }
 
 void emergency() {
@@ -124,33 +134,34 @@ void setup() {
   digitalWrite(rkt::PIN_MOTOR_FWD, LOW);
   digitalWrite(rkt::PIN_MOTOR_REV, LOW);
 
-  //setup timer2 interrupt for ignition procedure. 1kHz -> 64 prescalar + 249 compare interrupt
-  // The control of the rocket will be disabled during ignition if delay() is used, which is blocking.
-  TCCR2A = 0;
-  TCCR2B = 0;
-  TCNT2 = 0;
-  OCR2A = 249;
-  
-  TCCR2A |= (1 << WGM21);
-  TCCR2B |= (1 << CS22);
-  TIMSK2 |= (1 << OCIE2A);
+//  //setup timer2 interrupt for ignition procedure. 1kHz -> 64 prescalar + 249 compare interrupt
+//  // The control of the rocket will be disabled during ignition if delay() is used, which is blocking.
+//  TCCR2A = 0;
+//  TCCR2B = 0;
+//  TCNT2 = 0;
+//  OCR2A = 249;
+//  
+//  TCCR2A |= (1 << WGM21);
+//  TCCR2B |= (1 << CS22);
+//  TIMSK2 |= (1 << OCIE2A);
   Serial.print("Set Pulses: ");
   Serial.println(MV_R1.set_pulses);
   sei();
-  Timer1.initialize(100);
-  Timer1.attachInterrupt(ignition_duration_check);
+  Timer1.initialize(650000);
+  Timer1.attachInterrupt(ignition);
+  Timer1.stop();
 }
 
-void ignition_duration_check(){
-  if (RECVD_IG_CMD && (ematch_continuity = true) ){
-    burn_time += 1;
-    if (burn_time >= burn_duration){
-      RECVD_IG_CMD = 0;
-      MV_R1.actuate(2);
-      shut_bv_after_ignition = true;
-    }
-  }
-}
+//void ignition_duration_check(){
+//  if (ignited && (ematch_continuity = true) ){
+//    burn_time += 1;
+//    if (burn_time >= burn_duration){
+//      RECVD_IG_CMD = 0;
+//      MV_R1.actuate(2);
+//      shut_bv_after_ignition = true;
+//    }
+//  }
+//}
 
 void checkEMatchCont() {
   ematch_continuity = digitalRead(PIN_EMATCH_CONT);
@@ -167,14 +178,15 @@ void loop() {
   // Put code in to activate relays upon request.
   rf_tr.check_receive_packet();
   checkEMatchCont();
-
-  if(shut_bv_after_ignition){
-    turn_motor_on(0);
-    shut_bv_after_ignition = false;
-  }
     
-  int8_t BV_Command = commands[0]; //check ball valve desired state
+  uint8_t BV_Command = commands[0]; //check ball valve desired state
   switch (BV_Command) { //set desired ball valve state
+    case 255: // TODO check char types
+      Serial.println("IG CASE");
+      Serial.println("RECVD IGNITION CMD...");
+      Timer1.restart();
+      commands[0] = 2;
+      break;
   case 2:
     Serial.println("Valve Open");
     MV_R1.actuate(2);
@@ -184,12 +196,6 @@ void loop() {
     Serial.println("valve close");
     MV_R1.actuate(1);
     commands[2] = 0;
-    break;
-  case 255: // TODO check char types
-    Serial.println("RECVD IGNITION CMD...");
-    ignition();
-    RECVD_IG_CMD = 1;
-    commands[0] = 2;
     break;
   case 0:
     // Serial.println("HOLDING");

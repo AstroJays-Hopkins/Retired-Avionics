@@ -78,13 +78,15 @@ void fuelCom() {
 }
 
 void BV() {
-    if(getButton(&bvFwd) == LOW && cs.MV_R1 == rkt::CMD_V_NOOP) {
+    if(getButton(&ignition) == LOW && getButton(&bvFwd) == LOW && cs.MV_R1 == rkt::CMD_V_NOOP) {
         cs.MV_R1 = rkt::CMD_V_OPEN;
         cs.newCommand = true;
-    } else if(getButton(&bvRev) == LOW && cs.MV_R1 == rkt::CMD_V_NOOP) {
+    } else if(getButton(&ignition) == LOW && getButton(&bvRev) == LOW
+              && cs.MV_R1 == rkt::CMD_V_NOOP) {
         cs.MV_R1 = rkt::CMD_V_CLOSE;
         cs.newCommand = true;
-    } else if(getButton(&bvFwd) == HIGH && getButton(&bvRev) == HIGH && cs.MV_R1 != rkt::CMD_V_NOOP) {
+    } else if(getButton(&ignition) == LOW &&getButton(&bvFwd) == HIGH &&
+              getButton(&bvRev) == HIGH && cs.MV_R1 != rkt::CMD_V_NOOP) {
         cs.MV_R1 = rkt::CMD_V_NOOP;
         cs.newCommand = true;
     }
