@@ -47,6 +47,7 @@ bool Vent_state = false;
 
 /* *** IGNITION PARAMETER *** */
 volatile uint8_t igniter_x_cnt = 0;
+volatile uint8_t stop_x_cnt = 0;
 volatile bool ignited = false;
 bool shut_bv_after_ignition = false;
 const int burn_duration = 650; // The duration for the ignition burn, in 10ms.
@@ -69,13 +70,30 @@ void switch_solenoid_valve(int valve_pin, int state){
   digitalWrite(valve_pin, state);
 }
 
+void stopRun() {
+  // The ignition function will run twice before we actually want it to ignite
+  // Once when the interrupt is attached, and once when the timer is started
+  if (stop_x_cnt > 1) {
+    MV_R1.actuate(1);
+    Timer1.stop();
+    Timer1.detachInterrupt();
+    stop_x_cnt = 1;
+  } else {
+    ++igniter_x_cnt;
+  }
+}
+
 void ignition() {
   // The ignition function will run twice before we actually want it to ignite
   // Once when the interrupt is attached, and once when the timer is started
   if (igniter_x_cnt > 1) {
     MV_R1.actuate(2);
     Timer1.stop();
-    // Timer1.detachInterrupt();
+    Timer1.detachInterrupt();
+    Timer1.setPeriod(7000000);
+    Timer1.stop();
+    Timer1.attachInterrupt(stopRun);
+    Timer1.start();
     igniter_x_cnt = 1;
   } else {
     ++igniter_x_cnt;
