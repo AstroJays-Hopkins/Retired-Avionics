@@ -181,7 +181,7 @@ def main(DATA_READ_INTERVAL=0.01):
         data_writer = writer(log)
 
         #Header row so you know what you're looking at (change as necessary)
-        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
+        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT2','PT3','LC1','LC2','LC3','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
         
         # Initialize sensors
         try:
