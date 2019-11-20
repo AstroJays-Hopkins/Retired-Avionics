@@ -44,7 +44,7 @@ class EngineController:
         self.updateFailed = False
         self.SCVState = False
         self.ecCommand = 0b0
-        self.firstrun = True
+        self.firstrun = False
         self.state = {'MV_S1': None,
                       'MV_R1': None,
                       'MV_R1_moving': None,
@@ -52,7 +52,6 @@ class EngineController:
                       'eMatch': None}
         self.update()
         self.SCVState = self.state['MV_G1']
-        self.firstrun = False
 
     def _writeI2C(self, device):
         '''
