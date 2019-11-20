@@ -42,12 +42,17 @@ void setup() {
 }
 
 void ventCom() {
-    if(getButton(&SV_R1_Ena) == HIGH && cs.MV_S1 != rkt::CMD_V_OPEN) {
-        Serial.println("Vent open");
-        cs.MV_S1 = rkt::CMD_V_OPEN;
-        cs.newCommand = true;
-    }
-    
+    if(getButton(&SV_R1_Ena) == HIGH) {
+        if(getButton(&vent) == LOW && cs.MV_S1 != rkt::CMD_V_OPEN) {
+            Serial.println("Vent close");
+            cs.MV_S1 = rkt::CMD_V_CLOSE;
+            cs.newCommand = true;
+        } else if(getButton(&vent) == HIGH && cs.MV_S1 != rkt::CMD_V_CLOSE) {
+            Serial.println("Vent open");
+            cs.MV_S1 = rkt::CMD_V_OPEN;
+            cs.newCommand = true;
+        }
+    }  
     if(getButton(&SV_R1_Ena) == LOW) {
         if(getButton(&vent) == LOW && cs.MV_S1 != rkt::CMD_V_OPEN) {
             Serial.println("Vent open");
