@@ -1,24 +1,21 @@
 ## LAST UPDATE 04/05/2019 AT 1:45 AM ##
 ## THIS IS UNFINISHED CODE PLS HELP ? ##
 ## TODO LIST: ##
-
-from datetime import datetime
 from csv import writer
-import threading
-import time
 import board
 import busio
-from constants import Const
-from engine_controller import EngineController
-from load_cell import LoadCellReader
-from RocketThermocouple import ThermocoupleReader
-from pressure_transducer import PressureTransducerReader
-from SendToFlask import sendData
-## import Server   # doesn't work
+from datetime import datetime
+import threading
+import time
 
 
-### LIST OF UNDEFINED VARIABLES, CONSTANTS --- UPDATE as NEEDED ###
-## --> No undefined variables  :)
+from sensors.loadcell import LoadCellReader
+from sensors.thermocouple import ThermocoupleReader
+from sensors.pressureTransducer import PressureTransducerReader
+from util.constants import Const
+from util.engine_controller import EngineController
+from util.SendToFlask import sendData
+
 
 class DACCLoop:
     '''
