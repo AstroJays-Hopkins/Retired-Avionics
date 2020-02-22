@@ -1,0 +1,8 @@
+adafruit-blinka
+adafruit-circuitpython
+adafruit-circuitpython-ads1x15
+adafruit-circuitpython-busdevice
+adafruit-circuitpython-max31855
+gpiozero
+requests
+serialpy
