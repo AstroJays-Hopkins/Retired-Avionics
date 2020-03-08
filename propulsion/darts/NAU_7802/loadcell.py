@@ -122,18 +122,20 @@ class LoadCell:
         self.SCL = SCL
         self.SDA = SDA
         self.i2c_port = busio.I2C(digitalio.DigitalInOut(SCL), digitalio.DigitalInOut(SDA))
-        self.offset0 = 0
+        self.offset = 0
         self.cal_factor = 0
+        self.cur_raw = 0
+        self.cur_data = 0
 
-        result = 1
+        result = 0  # There is problem if result is still 0 by the end of initialisation
         if init:
-            result &= ~(self.reset())
-            result &= ~(self.power_up())
-            result &= ~(self.set_LDO(self.LDO_values.NAU7802_LDO_3V3))
-            result &= ~(self.set_gain(self.gain_values.NAU7802_GAIN_128))
-            result &= ~(self.set_sample_rate(self.sample_rates.NAU7802_SPS_80))
-            result &= ~(self.write_register(self.registers.NAU7802_ADC, 0x30))
-            result &= ~(self.set_bit(self.registers.NAU7802_PGA_PWR, self.PGA_PWR_bits.NAU7802_PGA_PWR_PGA_CAP_EN))
+            result |= ~(self.reset())
+            result |= ~(self.power_up())
+            result |= ~(self.set_LDO(self.LDO_values.NAU7802_LDO_3V3))
+            result |= ~(self.set_gain(self.gain_values.NAU7802_GAIN_128))
+            result |= ~(self.set_sample_rate(self.sample_rates.NAU7802_SPS_80))
+            result |= ~(self.write_register(self.registers.NAU7802_ADC, 0x30))
+            result |= ~(self.set_bit(self.registers.NAU7802_PGA_PWR, self.PGA_PWR_bits.NAU7802_PGA_PWR_PGA_CAP_EN))
 
     def available(self):
         return self.get_bit(self.registers.NAU7802_PU_CTRL, self.PU_CTRL_bits.NAU7802_PU_CTRL_CR)
@@ -151,7 +153,7 @@ class LoadCell:
 
     def reset(self):
         self.set_bit(self.registers.NAU7802_PU_CTRL, self.PU_CTRL_bits.NAU7802_PU_CTRL_RR)
-        time.sleep(1)
+        time.sleep(0.01)
         return self.clear_bit(self.registers.NAU7802_PU_CTRL, self.PU_CTRL_bits.NAU7802_PU_CTRL_RR)
 
     def power_up(self):
@@ -167,8 +169,8 @@ class LoadCell:
         while self.get_bit(self.registers.NAU7802_PU_CTRL, self.PU_CTRL_bits.NAU7802_PU_CTRL_PUR) != 1:
             count += 1
             if count > 1000:
-                return 1
-        return 0
+                return False
+        return True
 
     def power_down(self):
         self.set_bit(self.registers.NAU7802_PU_CTRL, self.PU_CTRL_bits.NAU7802_PU_CTRL_PUD)
@@ -200,30 +202,33 @@ class LoadCell:
         return self.write_register(self.registers.NAU7802_CTRL2, val)
 
     def read_raw(self):
-        cur_data = self.read_register(self.registers.NAU7802_ADCO_B2, 3)
-        return cur_data
+        t = self.read_register(self.registers.NAU7802_ADCO_B2, 3)
+        if t is not None:
+            self.cur_raw = t
+        return t
 
     def read_register(self, reg_1, b_size=1):
         """
         If b_size = 1, reads the value stored in a register.
         Otherwise, reads a sequence of registers incrementally, incrementally, starting with reg_1.
-        The bytes from all registers is treated collectively, where the register with the lowest address is
-        the most significant byte.
+        The bytes from all registers is treated collectively as big-endian.
         :param reg_1: string
         :param b_size: int
         :return: int
         """
         buffer = bytearray(b_size)
-        cur_data = 0
         if not self.available():
             return None
         try:
             self.i2c_port.writeto(self.address, bytearray([reg_1]), stop=True)
         except:
-            return 1
+            return None
         self.i2c_port.readfrom_into(self.address, buffer)
+        """
         for i in range(3):
             cur_data |= (buffer[3-1-i] << 8*i)  # convert value taken separately from the 3 registers into a single int
+        """
+        cur_data = int.from_bytes(buffer, byteorder='big', signed=False)
         return cur_data
 
     def write_register(self, reg_1, byte):
@@ -237,8 +242,8 @@ class LoadCell:
             self.i2c_port.writeto(self.address, reg_1, stop=False)
             self.i2c_port.writeto(self.address, byte, stop=True)
         except:
-            return 1
-        return 0
+            return False
+        return True
 
     def set_bit(self, reg, bit_num):
         """
@@ -272,5 +277,22 @@ class LoadCell:
         val = self.read_register(reg) & (1 << bit_num)
         return val
 
+    def set_cal_factor(self, n_f):
+        self.cal_factor = n_f
 
-LDO_VALUES = LDOValues()
+    def set_offset(self, n_o):
+        self.offset = n_o
+
+    def get_converted(self):
+        self.read_raw()
+        self.cur_data = self.cal_factor * self.cur_raw + self.offset
+
+    def tare(self):
+        t = 0
+        sample_n = 50
+        for i in range(sample_n):
+            a = self.read_raw()
+            if a is not None:
+                t += self.cur_raw
+            time.sleep(0.02)
+        self.offset = t / sample_n
