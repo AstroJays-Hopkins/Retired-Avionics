@@ -17,7 +17,7 @@ class Const:
     # Setting inputs from arduino/raspberryPi
     PT_CHANNELS = [P0,P1,P2] # List of pressure transducer pins
     TC_CS_PINS = [board.D17, board.D27, board.D22, board.D5,
-                  board.D6, board.D26] # List of thermocouple pins
+                  board.D6, board.D13, board.D19, board.D26, board.D21] # List of thermocouple pins
     I2C_ADDR_SC = 0x11
     I2C_ADDR_EC = 0x10
 

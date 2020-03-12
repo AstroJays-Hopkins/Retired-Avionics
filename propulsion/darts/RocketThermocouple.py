@@ -11,7 +11,8 @@ import board
 import busio
 import digitalio
 import Adafruit_GPIO.SPI as SPI
-import adafruit_max31855 as MAX31855
+import adafruit_max31856
+import time
 
 
 # Raspberry Pi software SPI configuration.
@@ -27,9 +28,10 @@ DO  = 18
 #sensor = MAX31855.MAX31855(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE))
 
 
-class Thermocouple(MAX31855.MAX31855):
+class Thermocouple(adafruit_max31856.MAX31856):
     def __init__(self, cs_pin, spi):
-        super(Thermocouple, self).__init__(spi, digitalio.DigitalInOut(cs_pin))
+        super(Thermocouple, self).__init__(spi, digitalio.DigitalInOut(cs_pin), 
+                                           adafruit_max31856.ThermocoupleType.K)
         self.last_reading = self.temperature
 
     def readTempC(self):
@@ -77,6 +79,8 @@ class ThermocoupleReader():
                 data.append(TC.readTempC())
             except Exception:
                 data.append('E[TC]')
+            time.sleep(0.005)
+        print('\nTCs:' + '9:{} 8:{} 7:{} 6:{} 5:{} 4:{} 3:{} 2:{} 1:{}\n'.format(*data))
         return data
 
     def getLastReadings(self):

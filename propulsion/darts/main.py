@@ -60,17 +60,21 @@ class DACCLoop:
         # Initialize PTs
         print(Const.PT_CHANNELS)
         self.PT_Reader = PressureTransducerReader(Const.PT_CHANNELS, self.i2c)
+        self.PT_Reader.PTs[0].abCal(1975.240839, -638.151357)
+        self.PT_Reader.PTs[1].abCal(374.072062, -87.99646888)
+        self.PT_Reader.PTs[2].abCal(1994.141548, -645.6156099)
         # initialize engine controller communication interface
         self.ECI = EngineController(self.i2c)
 
     def collectData(self):
         """ Iterates through all sensors and collects data
         """
+        Is_Critical = False
         try:
             # Initialize data array
             self.data = {} 
             # update cached ECI state
-            self.ECI.update()
+            #self.ECI.update()
 
             #global Is_Critical
             # See here for why we need the above line: https://stackoverflow.com/questions/10851906/python-3-unboundlocalerror-local-variable-referenced-before-assignment#10852003
@@ -82,7 +86,7 @@ class DACCLoop:
             # Temperature Safety Check! Make sure tank isn't going to explode
             for temp in tempList:
                 if (isinstance(temp, float) and temp > Const.CRIT_T and Is_Critical == False):
-                    self.ECI.emergency_shutdown()
+                    # self.ECI.emergency_shutdown()
                     Is_Critical = True  ## this prevents Pi from continuously calling emergency_shutdown() during a critical condition --- just calls it once.
                     print('EMERGENCY SHUTDOWN: Critical Temperature detected')
 
@@ -93,7 +97,7 @@ class DACCLoop:
             # Pressure Safety Check! Make sure tank isn't going to explode
             for pressure in pressureList:
                 if (isinstance(pressure, float) and pressure > Const.CRIT_P and (Is_Critical == False)):
-                    self.ECI.emergency_shutdown()
+                    # self.ECI.emergency_shutdown()
                     Is_Critical = True
                     print('EMERGENCY SHUTDOWN: Critical Pressure detected')
             # [*TC1 (Top), *TC2 (Bottom), TC3, TC4, TC5, TC6, *PT1 (Top),
@@ -101,9 +105,11 @@ class DACCLoop:
             # *Sol1 (Fueling), *Sol2 (Venting), *Sol3 (Disconnect),
             # *Sol4 (Reset), *Ballvalve, *Ignition]
 
-            self.data['LC'] = self.LC_Reader.read_load_cells()
+            #self.data['LC'] = self.LC_Reader.read_load_cells()
             # Adding whether or not solenoid is fueling
        #[*TC1 (Top), *TC2 (Bottom), TC3, TC4, TC5, TC6, *PT1 (Top), *PT2 (Bottom), PT3, *LC1 (NOX mass), LC2 (Thrust), LC3, *Sol1 (Fueling), *Sol2 (Venting), *Sol3 (Disconnect), *Sol4 (Reset), *Ballvalve, *Ignition]
+            
+            self.data['FuelValve'] = self.ECI.getFuelSolState()
 
             # Adding state of vent valve
             self.data['VentValve'] = self.ECI.getVentState()
@@ -178,7 +184,7 @@ def main(DATA_READ_INTERVAL=0.01):
         data_writer = writer(log)
 
         #Header row so you know what you're looking at (change as necessary)
-        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','PT1','PT1','PT3','PT4','LC1','LC2','LC3','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
+        data_writer.writerow(['Timestamp','TC1','TC2','TC3','TC4','TC5','TC6','TC7', 'TC8', 'TC9', 'PT1','PT1','PT3','PT4','LC1','LC2','LC3','VentValve','Disconnect','Reset','BallValveState','Ematch', 'BallValveMoving'])
         
         # Initialize sensors
         try:
@@ -202,12 +208,12 @@ def main(DATA_READ_INTERVAL=0.01):
             if data is not None:
                 try:
                     writedatadict(data_writer, data)
-                    sendData(data)
+                    #sendData(data)
                     print(data)
                 except Exception as e:
                     print(str(e))
                     print("!!! Error in main DART loop whilst recording or transmitting data:")
-            time.sleep(DATA_READ_INTERVAL)
+            #time.sleep(DATA_READ_INTERVAL)
                 
                 
 

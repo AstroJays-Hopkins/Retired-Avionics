@@ -1,0 +1,497 @@
+No I2C device at address: 48
+Loadcell at /dev/usbLC0 did not connect
+Loadcell at /dev/usbLC1 did not connect
+Loadcell at /dev/usbLC2 did not connect
+[17, 27, 22, 5, 6, 26]
+thermocouple not connected
+TC Error 27
+[0, 1, 2]
+name 'Global_ADS' is not defined
+TC Error 0
+name 'Global_ADS' is not defined
+TC Error 1
+name 'Global_ADS' is not defined
+TC Error 2
+!!!!!!!!!!!!!!!!DO BE AWARE that there is an extra valueprinted to the terminal that indicates whether or not the ball valve is actuating.  This extra value is also recorded to the Pi's data file.  This extra value IS NOT TRANSMITTED to the Flask server or GUI!!!!!!!!!!!!!!!!
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25430>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c73a10>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c259d0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25f90>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75ba64b0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75ba6a10>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25e50>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25810>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c73ad0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75ba6e90>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75ba63d0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75ba6fd0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b344f0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75ba6f70>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75ba63b0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75ba6a90>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c256f0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c259f0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b345d0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25ed0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c259d0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c73b10>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b340f0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34970>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34f30>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b9f450>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34d10>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34930>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34230>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25530>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c258d0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b9f5d0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25ed0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25a70>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34610>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b343f0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34af0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c73d90>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b9f9b0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b342f0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34b10>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b345f0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25750>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25410>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b9f590>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25dd0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25ad0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34630>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b341f0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34390>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b9f770>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b9ff70>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34f90>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34b30>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34410>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25450>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c254b0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b9fd90>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b9fa50>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25f90>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25850>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.25+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b344b0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.25+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b349b0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.25+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34e30>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b384b0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c25cb0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75c257f0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b34d90>: Failed to establish a new connection: [Errno 111] Connection refused',))
+!!! Error in main DART loop whilst recording or transmitting data:
+list index out of range 5
+list index out of range
+list index out of range
+list index out of range
+list index out of range
+HTTPConnectionPool(host='0.0.0.0', port=5000): Max retries exceeded with url: /loadData?data=0.0+26.5+26.0+0.0+0.0+E%5BTC%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BPT%5D+E%5BLC%5D+E%5BLC%5D+E%5BLC%5D+0+0+E%5BDIS%5D+E%5BRES%5D+0+0+0 (Caused by NewConnectionError('<requests.packages.urllib3.connection.HTTPConnection object at 0x75b348b0>: Failed to establish a new connection: [Errno 111] Connection refused',))

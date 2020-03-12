@@ -1,6 +1,6 @@
 import board
 import busio
-import adafruit_ads1x15.ads1115 as ADS
+import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
 
@@ -8,17 +8,25 @@ class PressureTransducer:
     def __init__(self, Global_ADS, adc_channel):
         self.chan = AnalogIn(Global_ADS, adc_channel)
         self.last_reading = -1
+        self.aFactor = 0
+        self.bFactor = 0
+
     # PT produces maximum of 4.5V at 5076.32 PSI
     # and minimum of 0.5V at 0 PSI
     def readPressure(self):
         try:
-            self.last_reading = (self.chan.voltage - 0.5) * (5076.32 / 4)
+            self.last_reading = self.chan.voltage * self.aFactor + self.bFactor
+            print(self.chan.voltage)
             return self.last_reading
         except Exception as e:
             print("!!! Error whilst reading PTs:")
             print(str(e))
             print("Returning \"E\"")
             return "E"
+
+    def abCal(self, a, b):
+        self.aFactor = a
+        self.bFactor = b
 
 
 class PressureTransducerReader:
@@ -39,7 +47,7 @@ class PressureTransducerReader:
             # Create the I2C bus
             self.i2c = i2c
             # Create the ADC object using the I2C bus
-            self.ADS = ADS.ADS1115(self.i2c)
+            self.ADS = ADS.ADS1015(self.i2c)
         except Exception as e:
             print(e)
         for channel in adc_channels:
