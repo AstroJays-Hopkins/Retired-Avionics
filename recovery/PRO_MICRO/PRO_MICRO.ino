@@ -22,6 +22,7 @@
 
 // 2: i2c SCL
 // 3: i2c SDA
+// 4: buzzer pin
 // 8: separation (main??)
 // 9: drogue
 
@@ -33,7 +34,7 @@ int loop_counter;
 
 //%%%%%%%%%%%%%%%%%%%%%%%% MUSIC SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 
-Music music(33);
+Music music(4);
 
 //%%%%%%%%%%%%%%%%%%%%%%%% DATALOGGER SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 int chipSelect = 10;
