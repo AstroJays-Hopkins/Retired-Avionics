@@ -3,12 +3,29 @@
 #include <SPI.h>
 #include <SD.h>
 #include <SoftwareSerial.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BNO055.h>  // IMU
-#include <utility/imumaths.h>
-#include <music.h>
-#include <pitches.h>
+#include "Adafruit_Sensor.h"
+#include "Adafruit_BNO055.h"  // IMU
+#include "utility/imumaths.h"
+#include "music/music.h"
+#include "music/pitches.h"
 #include "music-scores.h"
+
+// WIRING
+
+// A2: accelerometer z
+// A1: accelerometer y
+// A0: accelerometer x
+// 15: uSD SCK
+// 14: uSD DO
+// 16: uSD DI
+// 10: uSD CS
+
+// 2: i2c SCL
+// 3: i2c SDA
+// 8: separation (main??)
+// 9: drogue
+
+// i2c goes to IMU (BNO55) and pressure sensor
 
 int Flight_Log[10] = {0,0,0,0,0,0,0,0,0};
 
@@ -88,8 +105,8 @@ void setup() {
   //recovery pins
   pinMode(R, OUTPUT);
   pinMode(SEP, OUTPUT);
-  digitalWrite(R, HIGH);
-  digitalWrite(SEP, HIGH);
+  digitalWrite(R, HIGH); // potentially change based on relays
+  digitalWrite(SEP, HIGH); // 
   
   //IMU
   bno.begin();
@@ -188,9 +205,9 @@ void AutoCalibrate(int xRaw, int yRaw, int zRaw)
 void loop(){
 
   ////////// Accelerometer //////////
-  int xRaw = ReadAxis(A13); //take accelerometer voltages in X,Y,Z directions
-  int yRaw = ReadAxis(A14);
-  int zRaw = ReadAxis(A15);
+  int xRaw = ReadAxis(A0); //take accelerometer voltages in X,Y,Z directions
+  int yRaw = ReadAxis(A1);
+  int zRaw = ReadAxis(A2);
 
   int xScaled = map(xRaw, xRawMin, xRawMax, -1000, 1000); //convert acceleration signals from voltage to numerical values
   int yScaled = map(yRaw, yRawMin, yRawMax, -1000, 1000);
@@ -212,7 +229,7 @@ void loop(){
   ang[3] = {(int)event.orientation.z};
   delay(BNO055_SAMPLERATE_DELAY_MS);
 
-  //ALTMETER BASED DEPLOYMENT LOOP//
+  //ALTIMETER BASED DEPLOYMENT LOOP//
   altitude = baro.getHeightCentiMeters()/30.48 - alt0;
   avg_alt += (altitude - avg_alt)/5;
   Serial.println(avg_alt);
@@ -279,8 +296,6 @@ void loop(){
   Flight_Log[5] = {ang[1]};
   Flight_Log[6] = {ang[2]};
   Flight_Log[7] = {ang[3]};
-  /*Flight_Log[8] = {latitude};
-  Flight_Log[9] = {longitude};*/
 
  String data = "";
 
