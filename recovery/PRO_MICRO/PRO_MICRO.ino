@@ -6,8 +6,8 @@
 #include "Adafruit_Sensor.h"
 #include "Adafruit_BNO055.h"  // IMU
 #include "utility/imumaths.h"
-#include "music/music.h"
-#include "music/pitches.h"
+#include "music.h"
+#include "pitches.h"
 #include "music-scores.h"
 
 // WIRING

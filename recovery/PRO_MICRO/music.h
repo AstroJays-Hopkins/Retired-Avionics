@@ -1,3 +1,6 @@
+#ifndef MUSIC_H
+#define MUSIC_H
+
 /* Music generating library --- can play music while running other code 
    provided the update() function is called periodically */
 
@@ -49,3 +52,7 @@ enum music_control {
 // (same effect of putting a dot next to a note in sheet music)
 // Must be used only for notes shorter than a whole note.
 #define MUSIC_DOT(N,L) MUSIC_SLUR, N, L, N, (L*2), MUSIC_NOSLUR
+
+#include "music_impl.h"
+
+#endif /* MUSIC_H */
