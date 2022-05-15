@@ -112,7 +112,7 @@ private:
 
     void ResetSensor()
     {
-	Wire.begin();
+	      Wire.begin();
         Wire.beginTransmission(i2cAddr_);
         Wire.write(cmdReset_);   
         Wire.endTransmission(); 

@@ -23,14 +23,15 @@
 // 2: i2c SCL
 // 3: i2c SDA
 // 4: buzzer pin
-// 8: separation (main??)
-// 9: drogue
+// 7: separation (main??)
+// 8: drogue
 
 // i2c goes to IMU (BNO55) and pressure sensor
 
 int Flight_Log[10] = {0,0,0,0,0,0,0,0,0};
 
 int loop_counter;
+File dataFile;
 
 //%%%%%%%%%%%%%%%%%%%%%%%% MUSIC SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
 
@@ -90,12 +91,14 @@ int currentStage = 1;
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%% RECOVERY PIN SETUP %%%%%%%%%%%%%%%%%%%%%%%%//
+const int VIDEO_ENA = 6; // video streaming system enable
+const int SEP = 7; // separation
+const int R = 8; // drogue
 
-const int SEP = 8; // separation
-const int R = 9; // drogue
-
-void setup() { 
-  Serial.begin(9600); 
+void setup() {
+  Serial.begin(115200);
+  // Serial1.begin(115200); 
+  // SerialUSB.begin(115200);
   Serial.println("initializing");
   
   //initialize pins
@@ -104,8 +107,10 @@ void setup() {
   pinMode(A2, INPUT); //Z
   
   //recovery pins
+  pinMode(VIDEO_ENA, OUTPUT);
   pinMode(R, OUTPUT);
   pinMode(SEP, OUTPUT);
+  digitalWrite(VIDEO_ENA, LOW);
   digitalWrite(R, HIGH); // potentially change based on relays
   digitalWrite(SEP, HIGH); // 
   
@@ -130,29 +135,33 @@ void setup() {
       alt0 += baro.getHeightCentiMeters()/30.48;
       delay(10);
     }
-  alt0 /= num_points;            //normalize to the number of samples collected
+  alt0 /= num_points;            // normalize to the number of samples collected
 
   //set initial states
   flight = Setup;
   timer = None;
   currentStage = stages[0];
+
+  // make random seed
+  randomSeed(analogRead(3));
  
   //initialize datalogging
   if (!SD.begin(chipSelect)) {
       Serial.println("Card failed, or not present");
     }
     else{
-      File dataFile = SD.open("Flight.txt", FILE_WRITE);
+      char buf[20];
+      sprintf(buf, "Flt%d.txt", random(2048));
+      dataFile = SD.open(buf, FILE_WRITE);
 
       if (dataFile){
           dataFile.println("Beginning New Flight");
-          dataFile.close();
           Serial.println("New Datalog Created");
         }
-      else{
-          Serial.println("error opening file Flight.txt");
-          return;
-        }
+     else{
+         Serial.println("error opening file Flight.txt");
+         return;
+       }
       Serial.println("Initialization Complete");
     }
     
@@ -209,11 +218,12 @@ void loop(){
   int xRaw = ReadAxis(A0); //take accelerometer voltages in X,Y,Z directions
   int yRaw = ReadAxis(A1);
   int zRaw = ReadAxis(A2);
-
+  
   int xScaled = map(xRaw, xRawMin, xRawMax, -1000, 1000); //convert acceleration signals from voltage to numerical values
   int yScaled = map(yRaw, yRawMin, yRawMax, -1000, 1000);
   int zScaled = map(zRaw, zRawMin, zRawMax, -1000, 1000);
 
+  // code below is incorrect, and pretty much will always be 0
   int AX = {xScaled / 1000.0}; //scale acceleration vectors
   int AY = {yScaled / 1000.0};
   int AZ = {zScaled / 1000.0};
@@ -229,11 +239,11 @@ void loop(){
   ang[2] = {(int)event.orientation.y};
   ang[3] = {(int)event.orientation.z};
   delay(BNO055_SAMPLERATE_DELAY_MS);
-
+  
   //ALTIMETER BASED DEPLOYMENT LOOP//
   altitude = baro.getHeightCentiMeters()/30.48 - alt0;
   avg_alt += (altitude - avg_alt)/5;
-  Serial.println(avg_alt);
+  
   switch(flight) {
     case Setup:
       currentStage = stages[0];
@@ -256,6 +266,13 @@ void loop(){
       Serial.println("LAUNCHPAD");
       AutoCalibrate(xRaw,yRaw,zRaw);
       old_Alt = avg_alt;
+
+      // flight started, start video
+      if (old_Alt > 5) {
+        digitalWrite(VIDEO_ENA, HIGH); // enable video
+      }
+
+      // transition out of state
       if(old_Alt > 100){
         T0 = millis();
         flight = Thrust;
@@ -280,7 +297,7 @@ void loop(){
       currentStage = stages[3];
       music.music_array = DESCENT_SIGNAL;
       Serial.println("DESCENT");
-      if (avg_alt < 1000){
+      if (avg_alt < 500){
         digitalWrite(R, LOW);
         currentStage = stages[4];
         music.music_array = RECOVERY_SIGNAL;
@@ -306,16 +323,14 @@ void loop(){
       data += " ";
     }
  }
- Serial.println("Data acquired");
- File dataFile = SD.open("Flight.txt", FILE_WRITE);
-
- if (dataFile){
-  dataFile.println(data);
-  dataFile.close();
- }
- else{
-  Serial.println("error opening file Flight.txt");
- }
+//  Serial.println("Data acquired");
+  if (dataFile){
+    dataFile.println(data);
+    dataFile.flush();
+  }
+//  else{
+//   Serial.println("error opening file Flight.txt");
+//  }
  
   //Debug//
 
@@ -332,7 +347,6 @@ void loop(){
     Serial.println(Flight_Log[5]);
     Serial.println(Flight_Log[6]); 
     Serial.println(Flight_Log[7]);
-
   }
  
  loop_counter++;
